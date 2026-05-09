@@ -119,6 +119,7 @@ export default function Home() {
   const pendingCount = data?.players.filter(player => (player.attendance?.status ?? "pending") === "pending").length ?? 0;
   const declinedCount = data?.players.filter(player => player.attendance?.status === "declined").length ?? 0;
   const myPlayer = data?.players.find(player => player.userId === user?.id);
+  const presencePlayers = data ? (isAdmin ? data.players : myPlayer ? [myPlayer] : []) : [];
 
   const availableEventPlayers = useMemo(() => {
     if (!data) return [];
@@ -166,7 +167,7 @@ export default function Home() {
             </CardHeader>
             <CardContent className="grid gap-3">
               <StatusRow label="Confirmados" value={confirmedCount} tone="text-emerald-700" />
-              <StatusRow label="Pendentes" value={pendingCount} tone="text-amber-700" />
+              {isAdmin && <StatusRow label="Pendentes" value={pendingCount} tone="text-amber-700" />}
               <StatusRow label="Não vão" value={declinedCount} tone="text-rose-700" />
               <Separator />
               <div className="flex items-center justify-between">
@@ -200,27 +201,32 @@ export default function Home() {
           <Card>
             <CardHeader>
               <CardTitle>Confirmação de presença</CardTitle>
-              <CardDescription>O sistema registra o horário da confirmação e mantém a ordem de chegada para formar os times.</CardDescription>
+              <CardDescription>{isAdmin ? "Acompanhe a resposta de todos os jogadores e registre chegadas presenciais." : "Escolha apenas uma das duas opções: Presença ou Ausência. Se você não responder, o sistema mantém a situação sem confirmação."}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3">
-              {data.players.map(player => {
+              {!isAdmin && !myPlayer && (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                  Para confirmar presença, primeiro crie seu cadastro na aba Jogadores. Depois disso, esta tela mostrará somente o seu controle de Presença ou Ausência.
+                </div>
+              )}
+              {presencePlayers.map(player => {
                 const status = (player.attendance?.status ?? "pending") as PresenceStatus;
+                const playerStatusLabel = status === "confirmed" ? "Presença marcada" : status === "declined" ? "Ausência marcada" : null;
                 return (
                   <div key={player.id} className="grid gap-3 rounded-2xl border bg-card p-4 md:grid-cols-[1fr_auto] md:items-center">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-semibold">{player.name}</h3>
                         <Badge variant="outline">{typeLabel[player.type]}</Badge>
-                        <Badge className={presenceTone[status]}>{presenceLabel[status]}</Badge>
+                        {isAdmin ? <Badge className={presenceTone[status]}>{presenceLabel[status]}</Badge> : playerStatusLabel ? <Badge className={presenceTone[status]}>{playerStatusLabel}</Badge> : null}
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
                         Confirmado em {dateTime(player.attendance?.confirmedAt)} · Ordem {player.attendance?.arrivalOrder ?? "-"} · Chegada presencial {dateTime(player.attendance?.arrivedAt)}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Button size="sm" onClick={() => setAttendance.mutate({ playerId: player.id, status: "confirmed" })}>Confirmar</Button>
-                      <Button size="sm" variant="secondary" onClick={() => setAttendance.mutate({ playerId: player.id, status: "pending" })}>Pendente</Button>
-                      <Button size="sm" variant="outline" onClick={() => setAttendance.mutate({ playerId: player.id, status: "declined" })}>Não vou</Button>
+                      <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => setAttendance.mutate({ playerId: player.id, status: "confirmed" })}>Presença</Button>
+                      <Button size="sm" className="border border-rose-200 bg-rose-600 text-white hover:bg-rose-700" onClick={() => setAttendance.mutate({ playerId: player.id, status: "declined" })}>Ausência</Button>
                       {isAdmin && <Button size="sm" variant="ghost" onClick={() => markArrived.mutate({ playerId: player.id })}>Chegou</Button>}
                     </div>
                   </div>

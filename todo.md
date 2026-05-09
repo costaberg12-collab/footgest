@@ -58,3 +58,12 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - [x] Ampliar os testes do router para cobrir createGuest, reviewPayment, generateTeams, assignReferees e recordEvent.
 
 - [x] Mostrar evidência verificável do Home.tsx ou ajustar a UI para comprovar que o cronômetro usa clockSeconds e clockRunning persistidos, com iniciar, pausar, retomar e estado salvo refletido na interface.
+
+## Ajuste solicitado pelo usuário em 2026-05-09
+
+- [x] Na tela do jogador, substituir as três opções de presença por apenas dois botões: **Presença** em verde e **Ausência** em vermelho, mantendo **Pendente** apenas como estado automático interno quando o jogador não escolher nenhuma opção.
+
+## Correção complementar de visibilidade de presença
+
+- [x] Ocultar qualquer badge ou texto visual de **Pendente** na tela do jogador, mantendo esse status apenas como estado interno quando não houver resposta.
+- [x] Diferenciar a renderização da área de presença para que o jogador veja somente seu próprio controle com **Presença** e **Ausência**, enquanto o administrador mantém visão geral de acompanhamento.
