@@ -1,5 +1,20 @@
 {
   "version": "7",
   "dialect": "mysql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1778342068693,
+      "tag": "0000_messy_natasha_romanoff",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1778342375661,
+      "tag": "0001_reflective_blob",
+      "breakpoints": true
+    }
+  ]
 }
