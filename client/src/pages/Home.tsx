@@ -205,7 +205,7 @@ export default function Home() {
 
   return (
     <div className="space-y-6 pb-20" style={brandStyle}>
-      <section className="overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_left,var(--brand-primary)_0,var(--brand-secondary)_48%,#081b13_100%)] p-5 text-white shadow-2xl md:p-8">
+      <section className="overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_left,var(--brand-primary)_0,var(--brand-primary)_35%,var(--brand-secondary)_70%,#081b13_100%)] p-5 text-white shadow-2xl md:p-8">
         <div className="grid gap-6 lg:grid-cols-[1.25fr_.75fr] lg:items-end">
           <div className="space-y-4">
             <Badge className="border-white/20 bg-white/15 text-white hover:bg-white/20">{data.settings.appName}</Badge>
