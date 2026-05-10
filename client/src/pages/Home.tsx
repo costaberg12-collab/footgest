@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { Activity, Banknote, CalendarClock, ClipboardList, Goal, QrCode, Settings, ShieldCheck, Trophy, Upload, Users } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 type PlayerType = "line" | "goalkeeper" | "both";
@@ -110,6 +110,28 @@ export default function Home() {
     confirmationMinute: "0",
     arrivalMinutesBefore: "15",
   });
+
+  const qrRef = useRef<SVGSVGElement>(null);
+
+  function downloadQrCode() {
+    if (!qrRef.current) return;
+    const svg = qrRef.current;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = `qrcode-chegada-${new Date().toISOString().slice(0, 10)}.png`;
+      link.click();
+    };
+    img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+  }
 
   function refresh(message: string) {
     toast.success(message);
@@ -259,8 +281,11 @@ export default function Home() {
                 <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_auto] md:items-center">
                   <div><p className="font-semibold">QR Code de chegada no campo</p><p className="text-sm text-muted-foreground">Gere e exiba este código no campo. O jogador só entra na ordem real de chegada após validar o código ou ser marcado pelo administrador.</p></div>
                   <div className="grid justify-items-center gap-2">
-                    {arrivalQrUrl ? <QRCodeSVG value={arrivalQrUrl} size={128} /> : <div className="grid h-32 w-32 place-items-center rounded-xl bg-white text-xs text-muted-foreground">Sem QR</div>}
-                    <Button size="sm" onClick={() => generateArrivalQr.mutate()}>Gerar QR Code</Button>
+                    {arrivalQrUrl ? <QRCodeSVG ref={qrRef} value={arrivalQrUrl} size={128} /> : <div className="grid h-32 w-32 place-items-center rounded-xl bg-white text-xs text-muted-foreground">Sem QR</div>}
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => generateArrivalQr.mutate()}>Gerar QR Code</Button>
+                      {arrivalQrUrl && <Button size="sm" variant="outline" onClick={downloadQrCode}>Baixar PNG</Button>}
+                    </div>
                   </div>
                 </div>
               )}

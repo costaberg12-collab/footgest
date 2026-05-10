@@ -78,3 +78,7 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - [x] Criar espaço administrativo para configurar uma **logo da turma**, inicialmente por URL, para aparecer no topo do FutGestão.
 - [x] Remover os botões de ajuste manual de **-1 minuto** e **+1 minuto** do cronômetro.
 - [x] Revisar e corrigir o cronômetro para iniciar em estado coerente, sem começar indevidamente com aproximadamente 2 minutos.
+
+## Melhorias adicionais solicitadas
+
+- [x] Adicionar botão **"Baixar QR Code"** na interface de configurações que permite salvar apenas a imagem do QR Code em PNG, sem salvar a página inteira.
