@@ -83,3 +83,4 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 
 - [x] Adicionar botão **"Baixar QR Code"** na interface de configurações que permite salvar apenas a imagem do QR Code em PNG, sem salvar a página inteira.
 - [x] Implementar painel de **Configurações** completo com edição de nome do app, descrição, cores primária e secundária, saldo inicial em caixa, horários do jogo e chegada, e upload de logo do grupo.
+- [x] Implementar análise automática de cores da logo: após upload, o app extrai as 2 cores dominantes e sugere como primária e secundária, com opção de aplicar ou escolher manualmente.

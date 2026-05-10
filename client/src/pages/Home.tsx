@@ -97,6 +97,7 @@ export default function Home() {
   const [eventForm, setEventForm] = useState({ type: "goal", minute: "0", playerId: "0", teamId: "0" });
   const [clockSeconds, setClockSeconds] = useState(0);
   const [qrToken, setQrToken] = useState("");
+  const [suggestedColors, setSuggestedColors] = useState<{ primary: string; secondary: string } | null>(null);
   const [settingsForm, setSettingsForm] = useState({
     appName: "FutGestão",
     appDescription: "",
@@ -112,6 +113,59 @@ export default function Home() {
   });
 
   const qrRef = useRef<SVGSVGElement>(null);
+
+  function extractColorsFromImage(imageUrl: string) {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0);
+      
+      // Extrair cores dominantes usando análise de pixels
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      const colorMap = new Map<string, number>();
+      
+      // Amostragem de pixels (a cada 4 pixels para performance)
+      for (let i = 0; i < data.length; i += 16) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+        
+        // Ignorar pixels transparentes
+        if (a < 128) continue;
+        
+        // Quantizar cores (reduzir para 64 cores)
+        const qr = Math.floor(r / 64) * 64;
+        const qg = Math.floor(g / 64) * 64;
+        const qb = Math.floor(b / 64) * 64;
+        const key = `${qr},${qg},${qb}`;
+        colorMap.set(key, (colorMap.get(key) || 0) + 1);
+      }
+      
+      // Ordenar por frequência
+      const sortedColors = Array.from(colorMap.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([key]) => {
+          const [r, g, b] = key.split(',').map(Number);
+          return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+        });
+      
+      if (sortedColors.length >= 2) {
+        setSuggestedColors({
+          primary: sortedColors[0],
+          secondary: sortedColors[1]
+        });
+      }
+    };
+    img.src = imageUrl;
+  }
 
   function downloadQrCode() {
     if (!qrRef.current) return;
@@ -648,10 +702,40 @@ export default function Home() {
                     const base64 = reader.result as string;
                     const dataBase64 = base64.split(',')[1];
                     uploadLogo.mutate({ fileName: file.name, mimeType: (file.type || 'image/png') as 'image/png' | 'image/jpeg' | 'image/webp' | 'image/svg+xml', dataBase64 });
+                    setTimeout(() => extractColorsFromImage(base64), 500);
                   };
                   reader.readAsDataURL(file);
                 }
               }} />
+              {suggestedColors && (
+                <div className="rounded-xl border-2 border-emerald-200 bg-emerald-50 p-4">
+                  <p className="mb-3 font-semibold text-emerald-900">Cores sugeridas pela logo:</p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 rounded-lg border-2" style={{ backgroundColor: suggestedColors.primary }} />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Primária</p>
+                        <code className="text-sm font-mono">{suggestedColors.primary.toUpperCase()}</code>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 rounded-lg border-2" style={{ backgroundColor: suggestedColors.secondary }} />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Secundária</p>
+                        <code className="text-sm font-mono">{suggestedColors.secondary.toUpperCase()}</code>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <Button size="sm" className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => {
+                      setSettingsForm({ ...settingsForm, primaryColor: suggestedColors.primary, secondaryColor: suggestedColors.secondary });
+                      setSuggestedColors(null);
+                      toast.success("Cores aplicadas!");
+                    }}>Aplicar cores</Button>
+                    <Button size="sm" variant="outline" className="flex-1" onClick={() => setSuggestedColors(null)}>Escolher manualmente</Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>}
