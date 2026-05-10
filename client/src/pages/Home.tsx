@@ -130,6 +130,19 @@ export default function Home() {
       const data = imageData.data;
       const colorMap = new Map<string, number>();
       
+      // Função para calcular saturação e luminância
+      const getSaturation = (r: number, g: number, b: number) => {
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const l = (max + min) / 2;
+        if (max === min) return 0;
+        return l > 128 ? (max - min) / (510 - max - min) : (max - min) / (max + min);
+      };
+      
+      const getLuminance = (r: number, g: number, b: number) => {
+        return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      };
+      
       // Amostragem de pixels (a cada 4 pixels para performance)
       for (let i = 0; i < data.length; i += 16) {
         const r = data[i];
@@ -140,15 +153,22 @@ export default function Home() {
         // Ignorar pixels transparentes
         if (a < 128) continue;
         
-        // Quantizar cores (reduzir para 64 cores)
-        const qr = Math.floor(r / 64) * 64;
-        const qg = Math.floor(g / 64) * 64;
-        const qb = Math.floor(b / 64) * 64;
+        const saturation = getSaturation(r, g, b);
+        const luminance = getLuminance(r, g, b);
+        
+        // Filtrar cores muito claras, muito escuras ou dessaturadas
+        // Manter apenas cores vibrantes (saturação > 0.2 e luminância entre 0.2 e 0.8)
+        if (saturation < 0.2 || luminance < 0.2 || luminance > 0.8) continue;
+        
+        // Quantizar cores (reduzir para 32 cores para melhor precisão)
+        const qr = Math.floor(r / 32) * 32;
+        const qg = Math.floor(g / 32) * 32;
+        const qb = Math.floor(b / 32) * 32;
         const key = `${qr},${qg},${qb}`;
         colorMap.set(key, (colorMap.get(key) || 0) + 1);
       }
       
-      // Ordenar por frequência
+      // Ordenar por frequência e pegar as 2 cores mais vibrantes
       const sortedColors = Array.from(colorMap.entries())
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5)
@@ -161,6 +181,11 @@ export default function Home() {
         setSuggestedColors({
           primary: sortedColors[0],
           secondary: sortedColors[1]
+        });
+      } else if (sortedColors.length === 1) {
+        setSuggestedColors({
+          primary: sortedColors[0],
+          secondary: "#0f172a"
         });
       }
     };
