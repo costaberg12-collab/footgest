@@ -573,16 +573,16 @@ export default function Home() {
                 <Field label="Descrição">
                   <Input value={settingsForm.appDescription} onChange={e => setSettingsForm({ ...settingsForm, appDescription: e.target.value })} placeholder="Descreva seu grupo" />
                 </Field>
-                <Field label="Cor primária">
-                  <div className="flex gap-2">
-                    <Input type="color" value={settingsForm.primaryColor} onChange={e => setSettingsForm({ ...settingsForm, primaryColor: e.target.value })} className="h-10 w-16 cursor-pointer" />
-                    <Input value={settingsForm.primaryColor} onChange={e => setSettingsForm({ ...settingsForm, primaryColor: e.target.value })} />
+                <Field label="Cor primária (clique para escolher)">
+                  <div className="flex items-center gap-3">
+                    <Input type="color" value={settingsForm.primaryColor} onChange={e => setSettingsForm({ ...settingsForm, primaryColor: e.target.value })} className="h-12 w-20 cursor-pointer rounded-lg border-2" />
+                    <code className="text-sm font-mono bg-muted px-3 py-2 rounded">{settingsForm.primaryColor.toUpperCase()}</code>
                   </div>
                 </Field>
-                <Field label="Cor secundária">
-                  <div className="flex gap-2">
-                    <Input type="color" value={settingsForm.secondaryColor} onChange={e => setSettingsForm({ ...settingsForm, secondaryColor: e.target.value })} className="h-10 w-16 cursor-pointer" />
-                    <Input value={settingsForm.secondaryColor} onChange={e => setSettingsForm({ ...settingsForm, secondaryColor: e.target.value })} />
+                <Field label="Cor secundária (clique para escolher)">
+                  <div className="flex items-center gap-3">
+                    <Input type="color" value={settingsForm.secondaryColor} onChange={e => setSettingsForm({ ...settingsForm, secondaryColor: e.target.value })} className="h-12 w-20 cursor-pointer rounded-lg border-2" />
+                    <code className="text-sm font-mono bg-muted px-3 py-2 rounded">{settingsForm.secondaryColor.toUpperCase()}</code>
                   </div>
                 </Field>
                 <Field label="Saldo inicial em caixa (R$)">
