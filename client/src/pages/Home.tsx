@@ -544,6 +544,118 @@ export default function Home() {
           </Card>
         </TabsContent>
 
+        {isAdmin && <TabsContent value="config" className="grid gap-4 lg:grid-cols-[1fr_1fr]">
+          <Card>
+            <CardHeader>
+              <CardTitle>Personalização do app</CardTitle>
+              <CardDescription>Edite o nome, descrição, cores e logo do seu grupo.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              <form className="grid gap-3" onSubmit={event => {
+                event.preventDefault();
+                updateSettings.mutate({
+                  appName: settingsForm.appName,
+                  appDescription: settingsForm.appDescription,
+                  primaryColor: settingsForm.primaryColor,
+                  secondaryColor: settingsForm.secondaryColor,
+                  logoUrl: settingsForm.logoUrl,
+                  openingBalanceCents: centsFromBRL(settingsForm.openingBalance),
+                  matchHour: Number(settingsForm.matchHour),
+                  matchMinute: Number(settingsForm.matchMinute),
+                  confirmationHour: Number(settingsForm.confirmationHour),
+                  confirmationMinute: Number(settingsForm.confirmationMinute),
+                  arrivalMinutesBefore: Number(settingsForm.arrivalMinutesBefore),
+                });
+              }}>
+                <Field label="Nome do app">
+                  <Input value={settingsForm.appName} onChange={e => setSettingsForm({ ...settingsForm, appName: e.target.value })} />
+                </Field>
+                <Field label="Descrição">
+                  <Input value={settingsForm.appDescription} onChange={e => setSettingsForm({ ...settingsForm, appDescription: e.target.value })} placeholder="Descreva seu grupo" />
+                </Field>
+                <Field label="Cor primária">
+                  <div className="flex gap-2">
+                    <Input type="color" value={settingsForm.primaryColor} onChange={e => setSettingsForm({ ...settingsForm, primaryColor: e.target.value })} className="h-10 w-16 cursor-pointer" />
+                    <Input value={settingsForm.primaryColor} onChange={e => setSettingsForm({ ...settingsForm, primaryColor: e.target.value })} />
+                  </div>
+                </Field>
+                <Field label="Cor secundária">
+                  <div className="flex gap-2">
+                    <Input type="color" value={settingsForm.secondaryColor} onChange={e => setSettingsForm({ ...settingsForm, secondaryColor: e.target.value })} className="h-10 w-16 cursor-pointer" />
+                    <Input value={settingsForm.secondaryColor} onChange={e => setSettingsForm({ ...settingsForm, secondaryColor: e.target.value })} />
+                  </div>
+                </Field>
+                <Field label="Saldo inicial em caixa (R$)">
+                  <Input value={settingsForm.openingBalance} onChange={e => setSettingsForm({ ...settingsForm, openingBalance: e.target.value })} />
+                </Field>
+                <Button type="submit">Salvar configurações</Button>
+              </form>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Horários e regras</CardTitle>
+              <CardDescription>Configure os horários do jogo, prazo de confirmação e chegada antecipada.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              <form className="grid gap-3" onSubmit={event => {
+                event.preventDefault();
+                updateSettings.mutate({
+                  appName: settingsForm.appName,
+                  appDescription: settingsForm.appDescription,
+                  primaryColor: settingsForm.primaryColor,
+                  secondaryColor: settingsForm.secondaryColor,
+                  logoUrl: settingsForm.logoUrl,
+                  openingBalanceCents: centsFromBRL(settingsForm.openingBalance),
+                  matchHour: Number(settingsForm.matchHour),
+                  matchMinute: Number(settingsForm.matchMinute),
+                  confirmationHour: Number(settingsForm.confirmationHour),
+                  confirmationMinute: Number(settingsForm.confirmationMinute),
+                  arrivalMinutesBefore: Number(settingsForm.arrivalMinutesBefore),
+                });
+              }}>
+                <Field label="Horário do jogo">
+                  <div className="flex gap-2">
+                    <Input type="number" min="0" max="23" value={settingsForm.matchHour} onChange={e => setSettingsForm({ ...settingsForm, matchHour: e.target.value })} placeholder="Hora" />
+                    <Input type="number" min="0" max="59" value={settingsForm.matchMinute} onChange={e => setSettingsForm({ ...settingsForm, matchMinute: e.target.value })} placeholder="Minuto" />
+                  </div>
+                </Field>
+                <Field label="Prazo para confirmar presença">
+                  <div className="flex gap-2">
+                    <Input type="number" min="0" max="23" value={settingsForm.confirmationHour} onChange={e => setSettingsForm({ ...settingsForm, confirmationHour: e.target.value })} placeholder="Hora" />
+                    <Input type="number" min="0" max="59" value={settingsForm.confirmationMinute} onChange={e => setSettingsForm({ ...settingsForm, confirmationMinute: e.target.value })} placeholder="Minuto" />
+                  </div>
+                </Field>
+                <Field label="Minutos antes para chegar no campo">
+                  <Input type="number" min="0" value={settingsForm.arrivalMinutesBefore} onChange={e => setSettingsForm({ ...settingsForm, arrivalMinutesBefore: e.target.value })} />
+                </Field>
+                <Button type="submit">Salvar horários</Button>
+              </form>
+            </CardContent>
+          </Card>
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Logo do grupo</CardTitle>
+              <CardDescription>Faça upload da logo do seu time ou grupo.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              {settingsForm.logoUrl && <img src={settingsForm.logoUrl} alt="Logo" className="h-32 w-32 rounded-xl border object-contain" />}
+              <input type="file" accept="image/*" onChange={e => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    const base64 = reader.result as string;
+                    const dataBase64 = base64.split(',')[1];
+                    uploadLogo.mutate({ fileName: file.name, mimeType: (file.type || 'image/png') as 'image/png' | 'image/jpeg' | 'image/webp' | 'image/svg+xml', dataBase64 });
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }} />
+            </CardContent>
+          </Card>
+        </TabsContent>}
+
         <TabsContent value="stats" className="grid gap-4 md:grid-cols-3">
           <Ranking title="Artilheiros" rows={stats.data?.scorers.map(item => ({ name: item.name, value: item.goals })) ?? []} suffix="gols" />
           <Ranking title="Cartões" rows={stats.data?.cards.map(item => ({ name: item.name, value: item.yellowCards + item.redCards })) ?? []} suffix="cartões" />
