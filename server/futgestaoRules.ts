@@ -135,22 +135,28 @@ export function selectRefereeRotation(params: {
   }));
 }
 
-export function nextFridayMatch(now = new Date()) {
+export function nextFridayMatch(now = new Date(), options?: {
+  matchHour?: number;
+  matchMinute?: number;
+  confirmationHour?: number;
+  confirmationMinute?: number;
+  arrivalMinutesBefore?: number;
+}) {
   const date = new Date(now);
   const day = date.getDay();
   const diff = (5 - day + 7) % 7;
   date.setDate(date.getDate() + diff);
-  date.setHours(20, 0, 0, 0);
+  date.setHours(options?.matchHour ?? 20, options?.matchMinute ?? 0, 0, 0);
 
   if (date.getTime() <= now.getTime()) {
     date.setDate(date.getDate() + 7);
   }
 
   const confirmationDeadline = new Date(date);
-  confirmationDeadline.setHours(18, 0, 0, 0);
+  confirmationDeadline.setHours(options?.confirmationHour ?? 18, options?.confirmationMinute ?? 0, 0, 0);
 
   const arrivalDeadline = new Date(date);
-  arrivalDeadline.setMinutes(arrivalDeadline.getMinutes() - 15);
+  arrivalDeadline.setMinutes(arrivalDeadline.getMinutes() - (options?.arrivalMinutesBefore ?? 15));
 
   return {
     matchDate: date,
@@ -178,16 +184,20 @@ export function calculateFinanceSummary(params: {
   payments: Array<{ status: "pending" | "sent" | "confirmed" | "rejected"; amountCents: number }>;
   guests: Array<{ paid: boolean; amountCents: number }>;
   expenses: Array<{ amountCents: number }>;
+  openingBalanceCents?: number;
 }) {
   const confirmedPayments = params.payments.filter(payment => payment.status === "confirmed").reduce((sum, payment) => sum + payment.amountCents, 0);
   const paidGuests = params.guests.filter(guest => guest.paid).reduce((sum, guest) => sum + guest.amountCents, 0);
   const totalExpenses = params.expenses.reduce((sum, expense) => sum + expense.amountCents, 0);
+  const openingBalanceCents = params.openingBalanceCents ?? 0;
+  const totalRevenue = confirmedPayments + paidGuests;
   return {
+    openingBalanceCents,
     confirmedPayments,
     paidGuests,
-    totalRevenue: confirmedPayments + paidGuests,
+    totalRevenue,
     totalExpenses,
-    balance: confirmedPayments + paidGuests - totalExpenses,
+    balance: openingBalanceCents + totalRevenue - totalExpenses,
   };
 }
 

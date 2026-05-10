@@ -96,12 +96,11 @@ describe("futgestao router mutations", () => {
     dbMock.delete.mockClear();
   });
 
-  it("registra presença confirmada mantendo horário, ordem de chegada e vínculo da partida", async () => {
+  it("registra presença confirmada sem marcar chegada real automaticamente", async () => {
     mockState.selectQueue.push(
       [match],
       [{ id: 20, name: "João", userId: 2, type: "line", active: true }],
       [],
-      [{ value: 4 }],
     );
     const caller = appRouter.createCaller(createContext("user", 2));
 
@@ -111,9 +110,31 @@ describe("futgestao router mutations", () => {
       matchId: 10,
       playerId: 20,
       status: "confirmed",
-      arrivalOrder: 5,
+      arrivedAt: null,
+      arrivalOrder: null,
     });
     expect((mockState.insertValues.at(-1) as { confirmedAt: Date }).confirmedAt).toBeInstanceOf(Date);
+  });
+
+  it("confirma chegada real por QR Code e define ordem de chegada", async () => {
+    const validToken = "qr-token-valido-com-mais-de-vinte-caracteres";
+    mockState.selectQueue.push(
+      [{ ...match, arrivalQrToken: validToken, arrivalQrExpiresAt: new Date(Date.now() + 60_000) }],
+      [{ id: 20, name: "João", userId: 2, type: "line", active: true }],
+      [],
+      [{ value: 4 }],
+    );
+    const caller = appRouter.createCaller(createContext("user", 2));
+
+    await expect(caller.futgestao.confirmArrivalByQr({ token: validToken })).resolves.toEqual({ success: true, playerId: 20, arrivalOrder: 5 });
+
+    expect(mockState.insertValues.at(-1)).toMatchObject({
+      matchId: 10,
+      playerId: 20,
+      status: "confirmed",
+      arrivalOrder: 5,
+    });
+    expect((mockState.insertValues.at(-1) as { arrivedAt: Date }).arrivedAt).toBeInstanceOf(Date);
   });
 
   it("envia comprovante de mensalidade como status enviado para o próprio jogador", async () => {
@@ -212,7 +233,7 @@ describe("futgestao router mutations", () => {
     ];
     mockState.selectQueue.push(
       [match],
-      playerRows.map((player, index) => ({ playerId: player.id, status: "confirmed", arrivalOrder: index + 1, confirmedAt: new Date() })),
+      playerRows.map((player, index) => ({ playerId: player.id, status: "confirmed", arrivalOrder: index + 1, confirmedAt: new Date(), arrivedAt: new Date() })),
       playerRows,
       [],
       [{ id: 100, name: "A" }, { id: 101, name: "B" }],

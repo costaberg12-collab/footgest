@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
-import { Activity, Banknote, CalendarClock, ClipboardList, Goal, ShieldCheck, Trophy, Users } from "lucide-react";
+import { Activity, Banknote, CalendarClock, ClipboardList, Goal, QrCode, Settings, ShieldCheck, Trophy, Upload, Users } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -84,6 +85,10 @@ export default function Home() {
   const assignReferees = trpc.futgestao.assignReferees.useMutation({ onSuccess: () => refresh("Arbitragem definida.") });
   const setClock = trpc.futgestao.setClock.useMutation({ onSuccess: () => refresh("Cronômetro salvo.") });
   const recordEvent = trpc.futgestao.recordEvent.useMutation({ onSuccess: () => refresh("Evento registrado.") });
+  const generateArrivalQr = trpc.futgestao.generateArrivalQr.useMutation({ onSuccess: () => refresh("QR Code de chegada gerado.") });
+  const confirmArrivalByQr = trpc.futgestao.confirmArrivalByQr.useMutation({ onSuccess: data => refresh(`Chegada registrada. Ordem ${data.arrivalOrder}.`) });
+  const updateSettings = trpc.futgestao.updateSettings.useMutation({ onSuccess: () => refresh("Configurações salvas.") });
+  const uploadLogo = trpc.futgestao.uploadLogo.useMutation({ onSuccess: result => { setSettingsForm(form => ({ ...form, logoUrl: result.url })); refresh("Logo enviada."); } });
 
   const [playerForm, setPlayerForm] = useState<FormState>(initialPlayerForm);
   const [guestForm, setGuestForm] = useState({ hostPlayerId: "0", name: "", amount: "10" });
@@ -91,6 +96,20 @@ export default function Home() {
   const [expenseForm, setExpenseForm] = useState({ category: "field", description: "", amount: "" });
   const [eventForm, setEventForm] = useState({ type: "goal", minute: "0", playerId: "0", teamId: "0" });
   const [clockSeconds, setClockSeconds] = useState(0);
+  const [qrToken, setQrToken] = useState("");
+  const [settingsForm, setSettingsForm] = useState({
+    appName: "FutGestão",
+    appDescription: "",
+    primaryColor: "#16a34a",
+    secondaryColor: "#0f172a",
+    logoUrl: "",
+    openingBalance: "0",
+    matchHour: "20",
+    matchMinute: "0",
+    confirmationHour: "18",
+    confirmationMinute: "0",
+    arrivalMinutesBefore: "15",
+  });
 
   function refresh(message: string) {
     toast.success(message);
@@ -99,6 +118,24 @@ export default function Home() {
   }
 
   const data = overview.data;
+  const appDescription = data?.settings.appDescription || "{appDescription}";
+
+  useEffect(() => {
+    if (!data?.settings) return;
+    setSettingsForm({
+      appName: data.settings.appName,
+      appDescription: data.settings.appDescription ?? "",
+      primaryColor: data.settings.primaryColor,
+      secondaryColor: data.settings.secondaryColor,
+      logoUrl: data.settings.logoUrl ?? "",
+      openingBalance: String((data.settings.openingBalanceCents ?? 0) / 100).replace(".", ","),
+      matchHour: String(data.settings.matchHour ?? 20),
+      matchMinute: String(data.settings.matchMinute ?? 0),
+      confirmationHour: String(data.settings.confirmationHour ?? 18),
+      confirmationMinute: String(data.settings.confirmationMinute ?? 0),
+      arrivalMinutesBefore: String(data.settings.arrivalMinutesBefore ?? 15),
+    });
+  }, [data?.settings]);
 
   useEffect(() => {
     if (!data?.match) return;
@@ -115,6 +152,8 @@ export default function Home() {
   }, [data?.match.clockRunning]);
 
   const isAdmin = user?.role === "admin";
+  const arrivalQrUrl = data?.match.arrivalQrToken ? `${window.location.origin}/?chegada=${data.match.arrivalQrToken}` : "";
+  const brandStyle = data?.settings ? ({ "--brand-primary": data.settings.primaryColor, "--brand-secondary": data.settings.secondaryColor } as React.CSSProperties) : undefined;
   const confirmedCount = data?.players.filter(player => player.attendance?.status === "confirmed").length ?? 0;
   const pendingCount = data?.players.filter(player => (player.attendance?.status ?? "pending") === "pending").length ?? 0;
   const declinedCount = data?.players.filter(player => player.attendance?.status === "declined").length ?? 0;
@@ -143,15 +182,15 @@ export default function Home() {
   }
 
   return (
-    <div className="space-y-6 pb-20">
-      <section className="overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_left,#22c55e_0,#0f3d26_42%,#081b13_100%)] p-5 text-white shadow-2xl md:p-8">
+    <div className="space-y-6 pb-20" style={brandStyle}>
+      <section className="overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_left,var(--brand-primary)_0,var(--brand-secondary)_48%,#081b13_100%)] p-5 text-white shadow-2xl md:p-8">
         <div className="grid gap-6 lg:grid-cols-[1.25fr_.75fr] lg:items-end">
           <div className="space-y-4">
-            <Badge className="border-white/20 bg-white/15 text-white hover:bg-white/20">Pelada de sexta-feira</Badge>
+            <Badge className="border-white/20 bg-white/15 text-white hover:bg-white/20">{data.settings.appName}</Badge>
             <div>
-              <h1 className="text-3xl font-black tracking-tight md:text-5xl">FutGestão</h1>
+              <div className="flex flex-wrap items-center gap-3">{data.settings.logoUrl && <img src={data.settings.logoUrl} alt="Logo do grupo" className="h-16 w-16 rounded-2xl border border-white/30 bg-white/90 object-contain p-2" />}<h1 className="text-3xl font-black tracking-tight md:text-5xl">{data.settings.appName}</h1></div>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-50 md:text-base">
-                Controle a confirmação, os convidados, o caixa, os times, a arbitragem e as estatísticas da sua turma em um único painel responsivo para web e celular.
+                {appDescription}
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
@@ -187,7 +226,7 @@ export default function Home() {
       </div>
 
       <Tabs defaultValue="presenca" className="space-y-4">
-        <TabsList className="grid h-auto grid-cols-2 gap-2 rounded-2xl bg-muted p-2 md:grid-cols-7">
+        <TabsList className="grid h-auto grid-cols-2 gap-2 rounded-2xl bg-muted p-2 md:grid-cols-8">
           <TabsTrigger value="presenca">Presença</TabsTrigger>
           <TabsTrigger value="jogadores">Jogadores</TabsTrigger>
           <TabsTrigger value="convidados">Convidados</TabsTrigger>
@@ -195,6 +234,7 @@ export default function Home() {
           <TabsTrigger value="times">Times</TabsTrigger>
           <TabsTrigger value="jogo">Jogo</TabsTrigger>
           <TabsTrigger value="stats">Estatísticas</TabsTrigger>
+          {isAdmin && <TabsTrigger value="config">Configurações</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="presenca">
@@ -209,6 +249,21 @@ export default function Home() {
                   Para confirmar presença, primeiro crie seu cadastro na aba Jogadores. Depois disso, esta tela mostrará somente o seu controle de Presença ou Ausência.
                 </div>
               )}
+              {!isAdmin && myPlayer && (
+                <div className="grid gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950">
+                  <div className="flex items-start gap-3"><QrCode className="mt-0.5 h-5 w-5" /><div><p className="font-semibold">Chegada real pelo QR Code do campo</p><p>Confirme presença antes. Quando chegar, escaneie o QR Code exibido pelo administrador ou cole o código abaixo. Só a chegada validada entra na ordem dos times.</p></div></div>
+                  <div className="flex flex-col gap-2 sm:flex-row"><Input value={qrToken} onChange={e => setQrToken(e.target.value)} placeholder="Código de chegada" /><Button onClick={() => confirmArrivalByQr.mutate({ token: qrToken })} disabled={!qrToken.trim()}>Validar chegada</Button></div>
+                </div>
+              )}
+              {isAdmin && (
+                <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_auto] md:items-center">
+                  <div><p className="font-semibold">QR Code de chegada no campo</p><p className="text-sm text-muted-foreground">Gere e exiba este código no campo. O jogador só entra na ordem real de chegada após validar o código ou ser marcado pelo administrador.</p></div>
+                  <div className="grid justify-items-center gap-2">
+                    {arrivalQrUrl ? <QRCodeSVG value={arrivalQrUrl} size={128} /> : <div className="grid h-32 w-32 place-items-center rounded-xl bg-white text-xs text-muted-foreground">Sem QR</div>}
+                    <Button size="sm" onClick={() => generateArrivalQr.mutate()}>Gerar QR Code</Button>
+                  </div>
+                </div>
+              )}
               {presencePlayers.map(player => {
                 const status = (player.attendance?.status ?? "pending") as PresenceStatus;
                 const playerStatusLabel = status === "confirmed" ? "Presença marcada" : status === "declined" ? "Ausência marcada" : null;
@@ -221,7 +276,7 @@ export default function Home() {
                         {isAdmin ? <Badge className={presenceTone[status]}>{presenceLabel[status]}</Badge> : playerStatusLabel ? <Badge className={presenceTone[status]}>{playerStatusLabel}</Badge> : null}
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Confirmado em {dateTime(player.attendance?.confirmedAt)} · Ordem {player.attendance?.arrivalOrder ?? "-"} · Chegada presencial {dateTime(player.attendance?.arrivedAt)}
+                        {isAdmin ? `Confirmado em ${dateTime(player.attendance?.confirmedAt)} · Ordem ${player.attendance?.arrivalOrder ?? "-"} · Chegada presencial ${dateTime(player.attendance?.arrivedAt)}` : `Sua chegada real: ${player.attendance?.arrivedAt ? `${dateTime(player.attendance.arrivedAt)} · ordem ${player.attendance.arrivalOrder ?? "-"}` : "ainda não validada por QR Code ou administrador"}`}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -372,6 +427,7 @@ export default function Home() {
           <Card>
             <CardHeader><CardTitle>Caixa do grupo</CardTitle></CardHeader>
             <CardContent className="space-y-3">
+              <StatusRow label="Saldo inicial em caixa" value={money(data.finance.openingBalanceCents)} tone="text-slate-700" />
               <StatusRow label="Mensalidades confirmadas" value={money(data.finance.confirmedPayments)} tone="text-emerald-700" />
               <StatusRow label="Convidados pagos" value={money(data.finance.paidGuests)} tone="text-emerald-700" />
               <StatusRow label="Despesas" value={money(data.finance.totalExpenses)} tone="text-rose-700" />
@@ -392,7 +448,7 @@ export default function Home() {
 
         <TabsContent value="times" className="grid gap-4 lg:grid-cols-[.8fr_1.2fr]">
           <Card>
-            <CardHeader><CardTitle>Organização automática</CardTitle><CardDescription>Primeiros confirmados jogam primeiro. O algoritmo prioriza goleiros e completa times com 5 linha + 1 goleiro ou 6 sem goleiro.</CardDescription></CardHeader>
+            <CardHeader><CardTitle>Organização automática</CardTitle><CardDescription>Primeiros com chegada validada por QR Code ou administrador jogam primeiro. O algoritmo prioriza goleiros e completa times com 5 linha + 1 goleiro ou 6 sem goleiro.</CardDescription></CardHeader>
             <CardContent className="grid gap-3">
               <Button disabled={!isAdmin} onClick={() => generateTeams.mutate()}>Gerar times</Button>
               <Button disabled={!isAdmin || data.teams.length === 0} variant="secondary" onClick={() => assignReferees.mutate()}>Definir arbitragem</Button>
@@ -436,8 +492,8 @@ export default function Home() {
             <CardContent className="grid gap-3">
               <div className="rounded-2xl bg-slate-950 p-6 text-center font-mono text-5xl font-black text-emerald-300">{String(Math.floor(clockSeconds / 60)).padStart(2, "0")}:{String(clockSeconds % 60).padStart(2, "0")}</div>
               <Badge className={data.match.clockRunning ? "w-fit bg-emerald-100 text-emerald-800" : "w-fit bg-slate-100 text-slate-700"}>{data.match.clockRunning ? "Cronômetro rodando" : "Cronômetro pausado"}</Badge>
-              <div className="grid grid-cols-3 gap-2"><Button onClick={() => setClockSeconds(clockSeconds + 60)}>+1 min</Button><Button variant="secondary" onClick={() => setClockSeconds(Math.max(0, clockSeconds - 60))}>-1 min</Button><Button variant="outline" onClick={() => { setClockSeconds(0); setClock.mutate({ clockSeconds: 0, clockRunning: false }); }}>Zerar</Button></div>
-              <div className="grid grid-cols-2 gap-2"><Button onClick={() => setClock.mutate({ clockSeconds, clockRunning: true })}>Iniciar / retomar</Button><Button variant="secondary" onClick={() => setClock.mutate({ clockSeconds, clockRunning: false })}>Pausar e salvar</Button></div>
+              <div className="grid grid-cols-3 gap-2"><Button onClick={() => setClock.mutate({ clockSeconds: 0, clockRunning: true })}>Iniciar do zero</Button><Button variant="secondary" onClick={() => setClock.mutate({ clockSeconds, clockRunning: true })}>Retomar</Button><Button variant="outline" onClick={() => { setClockSeconds(0); setClock.mutate({ clockSeconds: 0, clockRunning: false }); }}>Zerar</Button></div>
+              <Button variant="secondary" onClick={() => setClock.mutate({ clockSeconds, clockRunning: false })}>Pausar e salvar</Button>
             </CardContent>
           </Card>
           <Card>

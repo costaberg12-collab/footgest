@@ -1,8 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { COOKIE_NAME } from "@shared/const";
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import {
+  appSettings,
   attendances,
   expenses,
   gameEvents,
@@ -18,6 +20,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
+import { storagePut } from "./storage";
 import { calculateFinanceSummary, canConfirmAttendance, generateTeamsWithWaitingList, guestsAreReleased, nextFridayMatch, selectRefereeRotation, summarizePlayerStats } from "./futgestaoRules";
 
 async function requireDb() {
@@ -26,6 +29,38 @@ async function requireDb() {
     throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
   }
   return db;
+}
+
+const defaultSettings = {
+  id: 1,
+  appName: "FutGestão",
+  appDescription: "Controle a confirmação, os convidados, o caixa, os times, a arbitragem e as estatísticas da sua turma em um único painel responsivo para web e celular.",
+  primaryColor: "#16a34a",
+  secondaryColor: "#0f172a",
+  logoUrl: null as string | null,
+  openingBalanceCents: 0,
+  matchHour: 20,
+  matchMinute: 0,
+  confirmationHour: 18,
+  confirmationMinute: 0,
+  arrivalMinutesBefore: 15,
+};
+
+async function ensureAppSettings() {
+  const db = await requireDb();
+  const rows = await db.select().from(appSettings).where(eq(appSettings.id, 1)).limit(1);
+  if (rows[0]) return rows[0];
+  await db.insert(appSettings).values(defaultSettings).onDuplicateKeyUpdate({ set: defaultSettings });
+  return { ...defaultSettings, createdAt: new Date(), updatedAt: new Date() };
+}
+
+async function nextArrivalOrder(matchId: number) {
+  const db = await requireDb();
+  const maxOrderRows = await db
+    .select({ value: sql<number>`coalesce(max(${attendances.arrivalOrder}), 0)` })
+    .from(attendances)
+    .where(eq(attendances.matchId, matchId));
+  return Number(maxOrderRows[0]?.value ?? 0) + 1;
 }
 
 async function ensureCurrentMatch() {
@@ -39,7 +74,8 @@ async function ensureCurrentMatch() {
 
   if (existing[0]) return existing[0];
 
-  const next = nextFridayMatch();
+  const settings = await ensureAppSettings();
+  const next = nextFridayMatch(new Date(), settings);
   await db.insert(matches).values({
     title: "Pelada de sexta-feira",
     matchDate: next.matchDate,
@@ -123,6 +159,7 @@ export const appRouter = router({
       const teamRows = await db.select().from(teams).where(eq(teams.matchId, match.id)).orderBy(asc(teams.playOrder));
       const teamPlayerRows = await db.select().from(teamPlayers).where(eq(teamPlayers.matchId, match.id)).orderBy(asc(teamPlayers.arrivalOrder));
       const refereeRows = await db.select().from(refereeAssignments).where(eq(refereeAssignments.matchId, match.id)).orderBy(asc(refereeAssignments.rotationOrder));
+      const settings = await ensureAppSettings();
 
       const monthlyStatuses = playerRows
         .filter(player => player.isMonthlyMember)
@@ -136,7 +173,7 @@ export const appRouter = router({
       const assignedPlayerIds = new Set(teamPlayerRows.map(item => item.playerId).filter((id): id is number => Boolean(id)));
       const assignedGuestIds = new Set(teamPlayerRows.map(item => item.guestId).filter((id): id is number => Boolean(id)));
       const waitingPlayers = attendanceRows
-        .filter(attendance => attendance.status === "confirmed" && !assignedPlayerIds.has(attendance.playerId))
+        .filter(attendance => attendance.status === "confirmed" && attendance.arrivalOrder !== null && !assignedPlayerIds.has(attendance.playerId))
         .map(attendance => {
           const player = playerRows.find(item => item.id === attendance.playerId);
           return player ? { kind: "player" as const, id: player.id, name: player.name, type: player.type, arrivalOrder: attendance.arrivalOrder ?? 9999 } : null;
@@ -147,9 +184,10 @@ export const appRouter = router({
         .map((guest, index) => ({ kind: "guest" as const, id: guest.id, name: guest.name, type: "line" as const, arrivalOrder: 1000 + index }));
       const waitingList = [...waitingPlayers, ...waitingGuests].sort((a, b) => (a?.arrivalOrder ?? 9999) - (b?.arrivalOrder ?? 9999));
 
-      const finance = calculateFinanceSummary({ payments: paymentRows, guests: guestRows, expenses: expenseRows });
+      const finance = calculateFinanceSummary({ payments: paymentRows, guests: guestRows, expenses: expenseRows, openingBalanceCents: settings.openingBalanceCents });
 
       return {
+        settings,
         match,
         players: playerRows.map(player => ({
           ...player,
@@ -221,13 +259,10 @@ export const appRouter = router({
           .from(attendances)
           .where(and(eq(attendances.matchId, match.id), eq(attendances.playerId, input.playerId)))
           .limit(1);
-        const maxOrderRows = await db
-          .select({ value: sql<number>`coalesce(max(${attendances.arrivalOrder}), 0)` })
-          .from(attendances)
-          .where(eq(attendances.matchId, match.id));
-        const nextOrder = Number(maxOrderRows[0]?.value ?? 0) + 1;
-        const confirmedAt = input.status === "confirmed" ? new Date() : null;
-        const arrivalOrder = input.status === "confirmed" ? existing[0]?.arrivalOrder ?? nextOrder : null;
+        const isConfirmed = input.status === "confirmed";
+        const confirmedAt = isConfirmed ? existing[0]?.confirmedAt ?? new Date() : null;
+        const arrivalOrder = isConfirmed ? existing[0]?.arrivalOrder ?? null : null;
+        const arrivedAt = isConfirmed ? existing[0]?.arrivedAt ?? null : null;
 
         await db
           .insert(attendances)
@@ -236,10 +271,11 @@ export const appRouter = router({
             playerId: input.playerId,
             status: input.status,
             confirmedAt,
+            arrivedAt,
             arrivalOrder,
           })
           .onDuplicateKeyUpdate({
-            set: { status: input.status, confirmedAt, arrivalOrder, updatedAt: new Date() },
+            set: { status: input.status, confirmedAt, arrivedAt, arrivalOrder, updatedAt: new Date() },
           });
         return { success: true } as const;
       }),
@@ -247,11 +283,54 @@ export const appRouter = router({
     markArrived: adminProcedure.input(z.object({ playerId: z.number().int().positive() })).mutation(async ({ input }) => {
       const db = await requireDb();
       const match = await ensureCurrentMatch();
+      const existing = await db
+        .select()
+        .from(attendances)
+        .where(and(eq(attendances.matchId, match.id), eq(attendances.playerId, input.playerId)))
+        .limit(1);
+      const order = existing[0]?.arrivalOrder ?? await nextArrivalOrder(match.id);
+      const now = new Date();
       await db
-        .update(attendances)
-        .set({ arrivedAt: new Date(), updatedAt: new Date() })
-        .where(and(eq(attendances.matchId, match.id), eq(attendances.playerId, input.playerId)));
+        .insert(attendances)
+        .values({ matchId: match.id, playerId: input.playerId, status: "confirmed", confirmedAt: existing[0]?.confirmedAt ?? now, arrivedAt: now, arrivalOrder: order })
+        .onDuplicateKeyUpdate({ set: { status: "confirmed", confirmedAt: existing[0]?.confirmedAt ?? now, arrivedAt: now, arrivalOrder: order, updatedAt: now } });
       return { success: true } as const;
+    }),
+
+    generateArrivalQr: adminProcedure.mutation(async () => {
+      const db = await requireDb();
+      const match = await ensureCurrentMatch();
+      const token = randomUUID();
+      const expiresAt = new Date(new Date(match.matchDate).getTime() + 4 * 60 * 60 * 1000);
+      await db.update(matches).set({ arrivalQrToken: token, arrivalQrExpiresAt: expiresAt, updatedAt: new Date() }).where(eq(matches.id, match.id));
+      return { token, expiresAt } as const;
+    }),
+
+    confirmArrivalByQr: protectedProcedure.input(z.object({ token: z.string().min(20) })).mutation(async ({ input, ctx }) => {
+      const db = await requireDb();
+      const matchRows = await db.select().from(matches).where(eq(matches.arrivalQrToken, input.token)).limit(1);
+      const match = matchRows[0];
+      if (!match || !match.arrivalQrExpiresAt || new Date(match.arrivalQrExpiresAt).getTime() < Date.now()) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "QR Code inválido ou expirado. Peça ao administrador para gerar um novo código no campo." });
+      }
+      const playerRows = await db.select().from(players).where(eq(players.userId, ctx.user.id)).limit(1);
+      const player = playerRows[0];
+      if (!player) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Crie seu cadastro de jogador antes de confirmar chegada." });
+      const existing = await db
+        .select()
+        .from(attendances)
+        .where(and(eq(attendances.matchId, match.id), eq(attendances.playerId, player.id)))
+        .limit(1);
+      if (existing[0]?.status === "declined") {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Você marcou ausência. Altere para Presença antes de registrar chegada." });
+      }
+      const order = existing[0]?.arrivalOrder ?? await nextArrivalOrder(match.id);
+      const now = new Date();
+      await db
+        .insert(attendances)
+        .values({ matchId: match.id, playerId: player.id, status: "confirmed", confirmedAt: existing[0]?.confirmedAt ?? now, arrivedAt: now, arrivalOrder: order })
+        .onDuplicateKeyUpdate({ set: { status: "confirmed", confirmedAt: existing[0]?.confirmedAt ?? now, arrivedAt: now, arrivalOrder: order, updatedAt: now } });
+      return { success: true, playerId: player.id, arrivalOrder: order } as const;
     }),
 
     createGuest: protectedProcedure
@@ -332,7 +411,7 @@ export const appRouter = router({
       const candidates = attendanceRows
         .map(attendance => {
           const player = playerRows.find(item => item.id === attendance.playerId);
-          if (!player || !attendance.arrivalOrder) return null;
+          if (!player || !attendance.arrivalOrder || !attendance.arrivedAt) return null;
           return { id: player.id, name: player.name, type: player.type, arrivalOrder: attendance.arrivalOrder };
         })
         .filter(Boolean) as Array<{ id: number; name: string; type: "line" | "goalkeeper" | "both"; arrivalOrder: number }>;
@@ -386,7 +465,7 @@ export const appRouter = router({
       return { success: true } as const;
     }),
 
-    setClock: protectedProcedure.input(z.object({ clockSeconds: z.number().int().min(0), clockRunning: z.boolean() })).mutation(async ({ input, ctx }) => {
+    setClock: protectedProcedure.input(z.object({ clockSeconds: z.number().int().min(0).max(60 * 60 * 6), clockRunning: z.boolean() })).mutation(async ({ input, ctx }) => {
       const db = await requireDb();
       const match = await ensureCurrentMatch();
       await ensureScorekeeperPermission(match.id, ctx.user);
@@ -403,6 +482,38 @@ export const appRouter = router({
         await db.insert(gameEvents).values({ matchId: match.id, ...input });
         return { success: true } as const;
       }),
+
+
+    updateSettings: adminProcedure.input(z.object({
+      appName: z.string().min(2).max(80),
+      appDescription: z.string().max(600).optional().nullable(),
+      primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+      secondaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+      logoUrl: z.string().max(2000).optional().nullable(),
+      openingBalanceCents: z.number().int().min(-100000000).max(100000000),
+      matchHour: z.number().int().min(0).max(23),
+      matchMinute: z.number().int().min(0).max(59),
+      confirmationHour: z.number().int().min(0).max(23),
+      confirmationMinute: z.number().int().min(0).max(59),
+      arrivalMinutesBefore: z.number().int().min(0).max(180),
+    })).mutation(async ({ input }) => {
+      const db = await requireDb();
+      await db.insert(appSettings).values({ id: 1, ...input }).onDuplicateKeyUpdate({ set: { ...input, updatedAt: new Date() } });
+      return { success: true } as const;
+    }),
+
+    uploadLogo: adminProcedure.input(z.object({
+      fileName: z.string().min(1).max(160),
+      mimeType: z.enum(["image/png", "image/jpeg", "image/webp", "image/svg+xml"]),
+      dataBase64: z.string().min(20),
+    })).mutation(async ({ input }) => {
+      const cleanName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "-");
+      const buffer = Buffer.from(input.dataBase64, "base64");
+      const { url } = await storagePut(`branding/${cleanName}`, buffer, input.mimeType);
+      const db = await requireDb();
+      await db.insert(appSettings).values({ ...defaultSettings, logoUrl: url }).onDuplicateKeyUpdate({ set: { logoUrl: url, updatedAt: new Date() } });
+      return { url } as const;
+    }),
 
     stats: protectedProcedure.query(async () => {
       const db = await requireDb();

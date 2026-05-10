@@ -67,3 +67,14 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 
 - [x] Ocultar qualquer badge ou texto visual de **Pendente** na tela do jogador, mantendo esse status apenas como estado interno quando não houver resposta.
 - [x] Diferenciar a renderização da área de presença para que o jogador veja somente seu próprio controle com **Presença** e **Ausência**, enquanto o administrador mantém visão geral de acompanhamento.
+
+## Melhorias solicitadas em 2026-05-09: QR Code, configurações e cronômetro
+
+- [x] Implementar teste inicial de chegada por **QR Code**, permitindo que o administrador gere um código da rodada e que o jogador registre chegada real somente por esse fluxo.
+- [x] Permitir ao administrador lançar o **saldo inicial em caixa** já existente, para que o saldo do grupo some esse valor às receitas e despesas registradas.
+- [x] Criar área administrativa de **configurações da turma**, com edição de horários do jogo, prazo de confirmação e regra de chegada antecipada.
+- [x] Criar opção administrativa para editar a **descrição do aplicativo** exibida na tela principal.
+- [x] Criar opção administrativa para personalizar **cores principais** do aplicativo.
+- [x] Criar espaço administrativo para configurar uma **logo da turma**, inicialmente por URL, para aparecer no topo do FutGestão.
+- [x] Remover os botões de ajuste manual de **-1 minuto** e **+1 minuto** do cronômetro.
+- [x] Revisar e corrigir o cronômetro para iniciar em estado coerente, sem começar indevidamente com aproximadamente 2 minutos.

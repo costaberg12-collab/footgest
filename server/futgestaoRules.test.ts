@@ -166,6 +166,7 @@ describe("futgestaoRules", () => {
     });
 
     expect(summary).toEqual({
+      openingBalanceCents: 0,
       confirmedPayments: 5000,
       paidGuests: 1000,
       totalRevenue: 6000,

@@ -26,6 +26,23 @@ export const users = mysqlTable("users", {
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
 });
 
+export const appSettings = mysqlTable("appSettings", {
+  id: int("id").primaryKey(),
+  appName: varchar("appName", { length: 80 }).default("FutGestão").notNull(),
+  appDescription: text("appDescription"),
+  primaryColor: varchar("primaryColor", { length: 16 }).default("#16a34a").notNull(),
+  secondaryColor: varchar("secondaryColor", { length: 16 }).default("#0f172a").notNull(),
+  logoUrl: text("logoUrl"),
+  openingBalanceCents: int("openingBalanceCents").default(0).notNull(),
+  matchHour: int("matchHour").default(20).notNull(),
+  matchMinute: int("matchMinute").default(0).notNull(),
+  confirmationHour: int("confirmationHour").default(18).notNull(),
+  confirmationMinute: int("confirmationMinute").default(0).notNull(),
+  arrivalMinutesBefore: int("arrivalMinutesBefore").default(15).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export const players = mysqlTable("players", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").references(() => users.id),
@@ -51,6 +68,8 @@ export const matches = mysqlTable("matches", {
     .notNull(),
   clockSeconds: int("clockSeconds").default(0).notNull(),
   clockRunning: boolean("clockRunning").default(false).notNull(),
+  arrivalQrToken: varchar("arrivalQrToken", { length: 96 }),
+  arrivalQrExpiresAt: timestamp("arrivalQrExpiresAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -155,6 +174,7 @@ export const gameEvents = mysqlTable("gameEvents", {
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+export type AppSettings = typeof appSettings.$inferSelect;
 export type Player = typeof players.$inferSelect;
 export type Match = typeof matches.$inferSelect;
 export type Attendance = typeof attendances.$inferSelect;
