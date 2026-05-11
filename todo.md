@@ -95,3 +95,9 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - [ ] Criar tela de aceitar regulamento na primeira vez para novos jogadores
 - [ ] Implementar sistema de múltiplos agendamentos de jogo por semana (segunda, quarta, sexta, etc.)
 - [ ] Criar partidas automaticamente baseado nos agendamentos
+
+## Bugs Encontrados
+
+- [x] Horários não atualizam após salvar nas configurações (continuam com valores antigos) - CORRIGIDO: updateSettings agora atualiza partidas com status 'in_progress' além de 'scheduled'
+- [x] Horário de confirmação deve ser no mesmo dia do jogo (atualmente está no dia anterior)
+- [ ] Campo de horário de confirmação deve ser editável (permitir escolher hora e minuto)

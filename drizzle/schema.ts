@@ -186,3 +186,12 @@ export type Team = typeof teams.$inferSelect;
 export type TeamPlayer = typeof teamPlayers.$inferSelect;
 export type RefereeAssignment = typeof refereeAssignments.$inferSelect;
 export type GameEvent = typeof gameEvents.$inferSelect;
+
+export const regulationAcceptances = mysqlTable("regulationAcceptances", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  acceptedAt: timestamp("acceptedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type RegulationAcceptance = typeof regulationAcceptances.$inferSelect;

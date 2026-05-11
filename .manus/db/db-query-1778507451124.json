@@ -1,0 +1,17 @@
+{
+  "query": "SELECT id, matchDate, confirmationDeadline, arrivalDeadline, status FROM matches ORDER BY id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2GFHmixSSd3JKEW.8512cbb676ca --database b5ezpFoDDKcYftXFGj7PDa --execute SELECT id, matchDate, confirmationDeadline, arrivalDeadline, status FROM matches ORDER BY id DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "matchDate": "2026-05-16 19:00:00",
+      "confirmationDeadline": "2026-05-15 18:00:00",
+      "arrivalDeadline": "2026-05-16 18:45:00",
+      "status": "in_progress"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tmatchDate\tconfirmationDeadline\tarrivalDeadline\tstatus\n1\t2026-05-16 19:00:00\t2026-05-15 18:00:00\t2026-05-16 18:45:00\tin_progress\n",
+  "stderr": "",
+  "execution_time_ms": 560
+}

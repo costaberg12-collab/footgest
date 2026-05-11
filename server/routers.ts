@@ -500,7 +500,7 @@ export const appRouter = router({
     })).mutation(async ({ input }) => {
       const db = await requireDb();
       await db.insert(appSettings).values({ id: 1, ...input }).onDuplicateKeyUpdate({ set: { ...input, updatedAt: new Date() } });
-      const currentMatch = await db.select().from(matches).where(eq(matches.status, "scheduled")).limit(1);
+      const currentMatch = await db.select().from(matches).where(inArray(matches.status, ["scheduled", "in_progress"])).orderBy(asc(matches.matchDate)).limit(1);
       if (currentMatch[0]) {
         const next = nextFridayMatch(new Date(currentMatch[0].matchDate), {
           matchHour: input.matchHour,
