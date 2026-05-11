@@ -1,0 +1,17 @@
+{
+  "query": "SELECT id, confirmationHour, confirmationMinute, matchHour, matchMinute FROM appSettings LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2GFHmixSSd3JKEW.8512cbb676ca --database b5ezpFoDDKcYftXFGj7PDa --execute SELECT id, confirmationHour, confirmationMinute, matchHour, matchMinute FROM appSettings LIMIT 1;",
+  "rows": [
+    {
+      "id": "1",
+      "confirmationHour": "18",
+      "confirmationMinute": "0",
+      "matchHour": "19",
+      "matchMinute": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tconfirmationHour\tconfirmationMinute\tmatchHour\tmatchMinute\n1\t18\t0\t19\t0\n",
+  "stderr": "",
+  "execution_time_ms": 704
+}

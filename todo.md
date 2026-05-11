@@ -88,3 +88,10 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - [x] Corrigir problema de mudanças voltarem sozinhas nas configurações: agora as mudanças permanecem até o usuário salvar ou sair do formulário.
 - [x] Corrigir atualização de horários no cabeçalho: após salvar as configurações, o cabeçalho agora atualiza corretamente com os novos horários.
 - [x] Corrigir atualização de horários: agora quando você salva as configurações de horário, a partida atual é atualizada com os novos horários (confirmação, chegada, etc.).
+
+## Novas funcionalidades solicitadas
+
+- [x] Adicionar campo de regulamento nas configurações do admin (textarea para editar)
+- [ ] Criar tela de aceitar regulamento na primeira vez para novos jogadores
+- [ ] Implementar sistema de múltiplos agendamentos de jogo por semana (segunda, quarta, sexta, etc.)
+- [ ] Criar partidas automaticamente baseado nos agendamentos

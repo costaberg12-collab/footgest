@@ -111,6 +111,7 @@ export default function Home() {
     confirmationHour: "18",
     confirmationMinute: "0",
     arrivalMinutesBefore: "15",
+    regulationText: "",
   });
 
   const qrRef = useRef<SVGSVGElement>(null);
@@ -236,6 +237,7 @@ export default function Home() {
       confirmationHour: String(data.settings.confirmationHour ?? 18),
       confirmationMinute: String(data.settings.confirmationMinute ?? 0),
       arrivalMinutesBefore: String(data.settings.arrivalMinutesBefore ?? 15),
+      regulationText: data.settings.regulationText ?? "",
     });
   }, [data?.settings]);
 
@@ -762,6 +764,34 @@ export default function Home() {
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Regulamento</CardTitle>
+              <CardDescription>Adicione o regulamento que os jogadores devem aceitar ao acessar pela primeira vez.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              <form className="grid gap-3" onFocus={() => setIsEditingSettings(true)} onBlur={() => setIsEditingSettings(false)} onSubmit={event => {
+                event.preventDefault();
+                updateSettings.mutate({
+                  appName: settingsForm.appName,
+                  appDescription: settingsForm.appDescription,
+                  primaryColor: settingsForm.primaryColor,
+                  secondaryColor: settingsForm.secondaryColor,
+                  logoUrl: settingsForm.logoUrl,
+                  openingBalanceCents: centsFromBRL(settingsForm.openingBalance),
+                  matchHour: Number(settingsForm.matchHour),
+                  matchMinute: Number(settingsForm.matchMinute),
+                  confirmationHour: Number(settingsForm.confirmationHour),
+                  confirmationMinute: Number(settingsForm.confirmationMinute),
+                  arrivalMinutesBefore: Number(settingsForm.arrivalMinutesBefore),
+                  regulationText: settingsForm.regulationText,
+                });
+              }}>
+                <textarea value={settingsForm.regulationText} onChange={e => setSettingsForm({ ...settingsForm, regulationText: e.target.value })} placeholder="Digite o regulamento aqui..." className="min-h-48 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                <Button type="submit">Salvar regulamento</Button>
+              </form>
             </CardContent>
           </Card>
         </TabsContent>}

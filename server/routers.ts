@@ -496,6 +496,7 @@ export const appRouter = router({
       confirmationHour: z.number().int().min(0).max(23),
       confirmationMinute: z.number().int().min(0).max(59),
       arrivalMinutesBefore: z.number().int().min(0).max(180),
+      regulationText: z.string().max(10000).optional().nullable(),
     })).mutation(async ({ input }) => {
       const db = await requireDb();
       await db.insert(appSettings).values({ id: 1, ...input }).onDuplicateKeyUpdate({ set: { ...input, updatedAt: new Date() } });

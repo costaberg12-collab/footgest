@@ -39,6 +39,7 @@ export const appSettings = mysqlTable("appSettings", {
   confirmationHour: int("confirmationHour").default(18).notNull(),
   confirmationMinute: int("confirmationMinute").default(0).notNull(),
   arrivalMinutesBefore: int("arrivalMinutesBefore").default(15).notNull(),
+  regulationText: text("regulationText"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
