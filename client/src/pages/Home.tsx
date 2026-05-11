@@ -98,6 +98,7 @@ export default function Home() {
   const [clockSeconds, setClockSeconds] = useState(0);
   const [qrToken, setQrToken] = useState("");
   const [suggestedColors, setSuggestedColors] = useState<{ primary: string; secondary: string } | null>(null);
+  const [isEditingSettings, setIsEditingSettings] = useState(false);
   const [settingsForm, setSettingsForm] = useState({
     appName: "FutGestão",
     appDescription: "",
@@ -630,7 +631,7 @@ export default function Home() {
               <CardDescription>Edite o nome, descrição, cores e logo do seu grupo.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3">
-              <form className="grid gap-3" onSubmit={event => {
+              <form className="grid gap-3" onFocus={() => setIsEditingSettings(true)} onBlur={() => setIsEditingSettings(false)} onSubmit={event => {
                 event.preventDefault();
                 updateSettings.mutate({
                   appName: settingsForm.appName,
@@ -677,7 +678,7 @@ export default function Home() {
               <CardDescription>Configure os horários do jogo, prazo de confirmação e chegada antecipada.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3">
-              <form className="grid gap-3" onSubmit={event => {
+              <form className="grid gap-3" onFocus={() => setIsEditingSettings(true)} onBlur={() => setIsEditingSettings(false)} onSubmit={event => {
                 event.preventDefault();
                 updateSettings.mutate({
                   appName: settingsForm.appName,

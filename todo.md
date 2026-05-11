@@ -85,3 +85,5 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - [x] Implementar painel de **Configurações** completo com edição de nome do app, descrição, cores primária e secundária, saldo inicial em caixa, horários do jogo e chegada, e upload de logo do grupo.
 - [x] Implementar análise automática de cores da logo: após upload, o app extrai as 2 cores dominantes e sugere como primária e secundária, com opção de aplicar ou escolher manualmente.
 - [x] Remover fundo branco da logo PNG: agora exibe com fundo transparente tanto no cabeçalho quanto nas configurações.
+- [x] Corrigir problema de mudanças voltarem sozinhas nas configurações: agora as mudanças permanecem até o usuário salvar ou sair do formulário.
+- [x] Corrigir atualização de horários no cabeçalho: após salvar as configurações, o cabeçalho agora atualiza corretamente com os novos horários.
