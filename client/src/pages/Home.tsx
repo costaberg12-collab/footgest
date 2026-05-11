@@ -289,7 +289,7 @@ export default function Home() {
           <div className="space-y-4">
             <Badge className="border-white/20 bg-white/15 text-white hover:bg-white/20">{data.settings.appName}</Badge>
             <div>
-              <div className="flex flex-wrap items-center gap-3">{data.settings.logoUrl && <img src={data.settings.logoUrl} alt="Logo do grupo" className="h-16 w-16 rounded-2xl border border-white/30 bg-white/90 object-contain p-2" />}<h1 className="text-3xl font-black tracking-tight md:text-5xl">{data.settings.appName}</h1></div>
+              <div className="flex flex-wrap items-center gap-3">{data.settings.logoUrl && <img src={data.settings.logoUrl} alt="Logo do grupo" className="h-16 w-16 rounded-2xl border border-white/30 object-contain" style={{ backgroundColor: 'transparent' }} />}<h1 className="text-3xl font-black tracking-tight md:text-5xl">{data.settings.appName}</h1></div>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-50 md:text-base">
                 {appDescription}
               </p>
@@ -718,7 +718,7 @@ export default function Home() {
               <CardDescription>Faça upload da logo do seu time ou grupo.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3">
-              {settingsForm.logoUrl && <img src={settingsForm.logoUrl} alt="Logo" className="h-32 w-32 rounded-xl border object-contain" />}
+              {settingsForm.logoUrl && <img src={settingsForm.logoUrl} alt="Logo" className="h-32 w-32 rounded-xl border object-contain" style={{ backgroundColor: 'transparent' }} />}
               <input type="file" accept="image/*" onChange={e => {
                 const file = e.target.files?.[0];
                 if (file) {
