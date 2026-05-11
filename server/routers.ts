@@ -499,6 +499,21 @@ export const appRouter = router({
     })).mutation(async ({ input }) => {
       const db = await requireDb();
       await db.insert(appSettings).values({ id: 1, ...input }).onDuplicateKeyUpdate({ set: { ...input, updatedAt: new Date() } });
+      const currentMatch = await db.select().from(matches).where(eq(matches.status, "scheduled")).limit(1);
+      if (currentMatch[0]) {
+        const next = nextFridayMatch(new Date(currentMatch[0].matchDate), {
+          matchHour: input.matchHour,
+          matchMinute: input.matchMinute,
+          confirmationHour: input.confirmationHour,
+          confirmationMinute: input.confirmationMinute,
+          arrivalMinutesBefore: input.arrivalMinutesBefore,
+        });
+        await db.update(matches).set({
+          matchDate: next.matchDate,
+          confirmationDeadline: next.confirmationDeadline,
+          arrivalDeadline: next.arrivalDeadline,
+        }).where(eq(matches.id, currentMatch[0].id));
+      }
       return { success: true } as const;
     }),
 

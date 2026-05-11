@@ -87,3 +87,4 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - [x] Remover fundo branco da logo PNG: agora exibe com fundo transparente tanto no cabeçalho quanto nas configurações.
 - [x] Corrigir problema de mudanças voltarem sozinhas nas configurações: agora as mudanças permanecem até o usuário salvar ou sair do formulário.
 - [x] Corrigir atualização de horários no cabeçalho: após salvar as configurações, o cabeçalho agora atualiza corretamente com os novos horários.
+- [x] Corrigir atualização de horários: agora quando você salva as configurações de horário, a partida atual é atualizada com os novos horários (confirmação, chegada, etc.).
