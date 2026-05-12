@@ -1,4 +1,7 @@
 export type PlayerType = "line" | "goalkeeper" | "both";
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
+import { addDays, set } from 'date-fns';
+
 export type AttendanceStatus = "confirmed" | "pending" | "declined";
 
 export type TeamCandidate = {
@@ -142,24 +145,48 @@ export function nextFridayMatch(now = new Date(), options?: {
   confirmationMinute?: number;
   arrivalMinutesBefore?: number;
 }) {
-  const date = new Date(now);
-  const day = date.getDay();
-  const diff = (5 - day + 7) % 7;
-  date.setDate(date.getDate() + diff);
-  date.setHours(options?.matchHour ?? 20, options?.matchMinute ?? 0, 0, 0);
-
-  if (date.getTime() <= now.getTime()) {
-    date.setDate(date.getDate() + 7);
+  const timezone = 'America/Sao_Paulo';
+  
+  // Converter agora para BRT
+  const nowBRT = toZonedTime(now, timezone);
+  const day = nowBRT.getDay();
+  
+  // Calcular próxima sexta em BRT
+  let diff = (5 - day + 7) % 7;
+  
+  // Se hoje é sexta e já passou do horário do jogo, pula 7 dias
+  const tentative = set(nowBRT, { 
+    hours: options?.matchHour ?? 20, 
+    minutes: options?.matchMinute ?? 0, 
+    seconds: 0, 
+    milliseconds: 0 
+  });
+  if (diff === 0 && tentative.getTime() <= nowBRT.getTime()) {
+    diff = 7;
   }
-
-  const confirmationDeadline = new Date(date);
-  confirmationDeadline.setHours(options?.confirmationHour ?? 18, options?.confirmationMinute ?? 0, 0, 0);
-
-  const arrivalDeadline = new Date(date);
-  arrivalDeadline.setMinutes(arrivalDeadline.getMinutes() - (options?.arrivalMinutesBefore ?? 15));
-
+  
+  // Calcular sexta com date-fns (manipula em BRT)
+  const fridayBRT = addDays(tentative, diff);
+  
+  // Converter para UTC para armazenar
+  const matchDate = fromZonedTime(fridayBRT, timezone);
+  
+  // Confirmação no mesmo dia
+  const confirmationBRT = set(fridayBRT, { 
+    hours: options?.confirmationHour ?? 18, 
+    minutes: options?.confirmationMinute ?? 0, 
+    seconds: 0, 
+    milliseconds: 0 
+  });
+  const confirmationDeadline = fromZonedTime(confirmationBRT, timezone);
+  
+  // Chegada 15 minutos antes
+  const arrivalBRT = new Date(fridayBRT);
+  arrivalBRT.setMinutes(arrivalBRT.getMinutes() - (options?.arrivalMinutesBefore ?? 15));
+  const arrivalDeadline = fromZonedTime(arrivalBRT, timezone);
+  
   return {
-    matchDate: date,
+    matchDate,
     confirmationDeadline,
     arrivalDeadline,
   };

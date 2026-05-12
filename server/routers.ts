@@ -75,7 +75,13 @@ async function ensureCurrentMatch() {
   if (existing[0]) return existing[0];
 
   const settings = await ensureAppSettings();
-  const next = nextFridayMatch(new Date(), settings);
+  const next = nextFridayMatch(new Date(), {
+    matchHour: Number(settings.matchHour),
+    matchMinute: Number(settings.matchMinute),
+    confirmationHour: Number(settings.confirmationHour),
+    confirmationMinute: Number(settings.confirmationMinute),
+    arrivalMinutesBefore: Number(settings.arrivalMinutesBefore),
+  });
   await db.insert(matches).values({
     title: "Pelada de sexta-feira",
     matchDate: next.matchDate,

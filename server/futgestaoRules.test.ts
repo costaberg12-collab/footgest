@@ -120,11 +120,17 @@ describe("futgestaoRules", () => {
 
   it("calcula a próxima sexta-feira com prazo de confirmação e chegada antecipada", () => {
     const next = nextFridayMatch(new Date("2026-05-07T12:00:00-03:00"));
+    const { toZonedTime } = require('date-fns-tz');
+    const timezone = 'America/Sao_Paulo';
+    
+    const matchDateBRT = toZonedTime(next.matchDate, timezone);
+    const confirmationBRT = toZonedTime(next.confirmationDeadline, timezone);
+    const arrivalBRT = toZonedTime(next.arrivalDeadline, timezone);
 
-    expect(next.matchDate.getDay()).toBe(5);
-    expect(next.matchDate.getHours()).toBe(20);
-    expect(next.confirmationDeadline.getHours()).toBe(18);
-    expect(next.arrivalDeadline.getMinutes()).toBe(45);
+    expect(matchDateBRT.getDay()).toBe(5);
+    expect(matchDateBRT.getHours()).toBe(20);
+    expect(confirmationBRT.getHours()).toBe(18);
+    expect(arrivalBRT.getMinutes()).toBe(45);
   });
 
   it("bloqueia confirmação de presença de jogador comum após sexta às 18h", () => {
