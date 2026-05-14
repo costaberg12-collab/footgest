@@ -1,0 +1,14 @@
+{
+  "query": "SELECT @@time_zone, @@system_time_zone;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2GFHmixSSd3JKEW.8512cbb676ca --database b5ezpFoDDKcYftXFGj7PDa --execute SELECT @@time_zone, @@system_time_zone;",
+  "rows": [
+    {
+      "@@time_zone": "SYSTEM",
+      "@@system_time_zone": "UTC"
+    }
+  ],
+  "messages": [],
+  "stdout": "@@time_zone\t@@system_time_zone\nSYSTEM\tUTC\n",
+  "stderr": "",
+  "execution_time_ms": 573
+}

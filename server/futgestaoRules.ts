@@ -152,31 +152,18 @@ export function nextFridayMatch(now = new Date(), options?: {
   const confirmationMinute = options?.confirmationMinute ?? 0;
   const arrivalMinutesBefore = options?.arrivalMinutesBefore ?? 15;
   
-  // Converter agora para BRT para calcular o dia da semana
+  // Calcular próxima sexta INTEIRAMENTE em BRT
   const nowBRT = toZonedTime(now, timezone);
-  const day = nowBRT.getDay();
+  const dayBRT = nowBRT.getDay();
+  let diff = (5 - dayBRT + 7) % 7;
   
-  // Calcular próxima sexta
-  let diff = (5 - day + 7) % 7;
-  
-  // Se diff é 0 (hoje é sexta), verificar se já passou do horário do jogo
+  // Se diff é 0 (hoje é sexta em BRT), adicionar 7 dias
   if (diff === 0) {
-    const tentative = set(nowBRT, { 
-      hours: matchHour, 
-      minutes: matchMinute, 
-      seconds: 0, 
-      milliseconds: 0 
-    });
-    if (tentative.getTime() <= nowBRT.getTime()) {
-      diff = 7; // Próxima sexta
-    }
+    diff = 7;
   }
   
-  // IMPORTANTE: Adicionar dias em UTC, não em BRT
-  const fridayUTC = addDays(now, diff);
-  
-  // Converter para BRT para setar a hora
-  const fridayBRT = toZonedTime(fridayUTC, timezone);
+  // Adicionar dias em BRT, não em UTC
+  const fridayBRT = addDays(nowBRT, diff);
   
   // Criar as datas com horários em BRT
   const matchDateBRT = set(fridayBRT, {
@@ -205,14 +192,10 @@ export function nextFridayMatch(now = new Date(), options?: {
   const confirmationDeadline = fromZonedTime(confirmationDateBRT, timezone);
   const arrivalDeadline = fromZonedTime(arrivalDateBRT, timezone);
   
-  // IMPORTANTE: O Drizzle converte Date para ISO string sem Z
-  // O MySQL interpreta como local time e adiciona o offset
-  // Solucao: Subtrair 3 horas (offset BRT) para compensar
-  const offset = 3 * 60 * 60 * 1000; // 3 horas em ms
   return {
-    matchDate: new Date(matchDate.getTime() - offset),
-    confirmationDeadline: new Date(confirmationDeadline.getTime() - offset),
-    arrivalDeadline: new Date(arrivalDeadline.getTime() - offset),
+    matchDate,
+    confirmationDeadline,
+    arrivalDeadline,
   };
 }
 

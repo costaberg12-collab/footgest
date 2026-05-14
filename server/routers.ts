@@ -509,16 +509,33 @@ export const appRouter = router({
       await db.insert(appSettings).values({ id: 1, ...input }).onDuplicateKeyUpdate({ set: { ...input, updatedAt: new Date() } });
       const currentMatch = await db.select().from(matches).where(inArray(matches.status, ["scheduled", "in_progress"])).orderBy(asc(matches.matchDate)).limit(1);
       if (currentMatch[0]) {
-        const matchDate = new Date(currentMatch[0].matchDate);
-        const confirmationDate = new Date(matchDate);
-        const arrivalDate = new Date(matchDate);
-        matchDate.setHours(input.matchHour, input.matchMinute, 0, 0);
-        confirmationDate.setHours(input.confirmationHour, input.confirmationMinute, 0, 0);
-        arrivalDate.setHours(input.matchHour, input.matchMinute - input.arrivalMinutesBefore, 0, 0);
+        // Converter de UTC para BRT, fazer as mudanças, e converter de volta
+        const { toZonedTime, fromZonedTime } = await import('date-fns-tz');
+        const timezone = 'America/Sao_Paulo';
+        
+        // Converter para BRT
+        const matchDateBRT = toZonedTime(new Date(currentMatch[0].matchDate), timezone);
+        const confirmationDateBRT = toZonedTime(new Date(currentMatch[0].confirmationDeadline), timezone);
+        const arrivalDateBRT = toZonedTime(new Date(currentMatch[0].arrivalDeadline), timezone);
+        
+        // Fazer as mudanças em BRT
+        matchDateBRT.setHours(input.matchHour, input.matchMinute, 0, 0);
+        confirmationDateBRT.setHours(input.confirmationHour, input.confirmationMinute, 0, 0);
+        arrivalDateBRT.setHours(input.matchHour, input.matchMinute - input.arrivalMinutesBefore, 0, 0);
+        
+        // Converter de volta para UTC
+        const matchDateUTC = fromZonedTime(matchDateBRT, timezone);
+        const confirmationDateUTC = fromZonedTime(confirmationDateBRT, timezone);
+        const arrivalDateUTC = fromZonedTime(arrivalDateBRT, timezone);
+        
+        // IMPORTANTE: O Drizzle converte Date para ISO string sem Z
+        // O MySQL interpreta como local time e adiciona o offset
+        // Solucao: Subtrair 3 horas (offset BRT) para compensar
+        const offset = 3 * 60 * 60 * 1000; // 3 horas em ms
         await db.update(matches).set({
-          matchDate,
-          confirmationDeadline: confirmationDate,
-          arrivalDeadline: arrivalDate,
+          matchDate: new Date(matchDateUTC.getTime() - offset),
+          confirmationDeadline: new Date(confirmationDateUTC.getTime() - offset),
+          arrivalDeadline: new Date(arrivalDateUTC.getTime() - offset),
         }).where(eq(matches.id, currentMatch[0].id));
       }
       return { success: true } as const;

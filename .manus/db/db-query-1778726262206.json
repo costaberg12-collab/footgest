@@ -1,0 +1,15 @@
+{
+  "query": "SELECT matchDate, confirmationDeadline, arrivalDeadline FROM matches LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2GFHmixSSd3JKEW.8512cbb676ca --database b5ezpFoDDKcYftXFGj7PDa --execute SELECT matchDate, confirmationDeadline, arrivalDeadline FROM matches LIMIT 1;",
+  "rows": [
+    {
+      "matchDate": "2026-05-16 00:00:00",
+      "confirmationDeadline": "2026-05-15 21:00:00",
+      "arrivalDeadline": "2026-05-15 23:45:00"
+    }
+  ],
+  "messages": [],
+  "stdout": "matchDate\tconfirmationDeadline\tarrivalDeadline\n2026-05-16 00:00:00\t2026-05-15 21:00:00\t2026-05-15 23:45:00\n",
+  "stderr": "",
+  "execution_time_ms": 621
+}
