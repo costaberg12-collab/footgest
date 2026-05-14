@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE matches SET matchDate = '2026-05-15 21:00:00', confirmationDeadline = '2026-05-15 18:00:00', arrivalDeadline = '2026-05-15 20:45:00' WHERE id = (SELECT id FROM matches ORDER BY id DESC LIMIT 1);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2GFHmixSSd3JKEW.8512cbb676ca --database b5ezpFoDDKcYftXFGj7PDa --execute UPDATE matches SET matchDate = '2026-05-15 21:00:00', confirmationDeadline = '2026-05-15 18:00:00', arrivalDeadline = '2026-05-15 20:45:00' WHERE id = (SELECT id FROM matches ORDER BY id DESC LIMIT 1);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 573
+}

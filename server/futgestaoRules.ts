@@ -1,6 +1,6 @@
 export type PlayerType = "line" | "goalkeeper" | "both";
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
-import { addDays, set } from 'date-fns';
+import { addDays, set, getDate, getMonth, getYear } from 'date-fns';
 
 export type AttendanceStatus = "confirmed" | "pending" | "declined";
 
@@ -146,49 +146,73 @@ export function nextFridayMatch(now = new Date(), options?: {
   arrivalMinutesBefore?: number;
 }) {
   const timezone = 'America/Sao_Paulo';
+  const matchHour = options?.matchHour ?? 20;
+  const matchMinute = options?.matchMinute ?? 0;
+  const confirmationHour = options?.confirmationHour ?? 18;
+  const confirmationMinute = options?.confirmationMinute ?? 0;
+  const arrivalMinutesBefore = options?.arrivalMinutesBefore ?? 15;
   
-  // Converter agora para BRT
+  // Converter agora para BRT para calcular o dia da semana
   const nowBRT = toZonedTime(now, timezone);
   const day = nowBRT.getDay();
   
-  // Calcular próxima sexta em BRT
+  // Calcular próxima sexta
   let diff = (5 - day + 7) % 7;
   
-  // Se hoje é sexta e já passou do horário do jogo, pula 7 dias
-  const tentative = set(nowBRT, { 
-    hours: options?.matchHour ?? 20, 
-    minutes: options?.matchMinute ?? 0, 
-    seconds: 0, 
-    milliseconds: 0 
-  });
-  if (diff === 0 && tentative.getTime() <= nowBRT.getTime()) {
-    diff = 7;
+  // Se diff é 0 (hoje é sexta), verificar se já passou do horário do jogo
+  if (diff === 0) {
+    const tentative = set(nowBRT, { 
+      hours: matchHour, 
+      minutes: matchMinute, 
+      seconds: 0, 
+      milliseconds: 0 
+    });
+    if (tentative.getTime() <= nowBRT.getTime()) {
+      diff = 7; // Próxima sexta
+    }
   }
   
-  // Calcular sexta com date-fns (manipula em BRT)
-  const fridayBRT = addDays(tentative, diff);
+  // IMPORTANTE: Adicionar dias em UTC, não em BRT
+  const fridayUTC = addDays(now, diff);
   
-  // Converter para UTC para armazenar
-  const matchDate = fromZonedTime(fridayBRT, timezone);
+  // Converter para BRT para setar a hora
+  const fridayBRT = toZonedTime(fridayUTC, timezone);
   
-  // Confirmação no mesmo dia
-  const confirmationBRT = set(fridayBRT, { 
-    hours: options?.confirmationHour ?? 18, 
-    minutes: options?.confirmationMinute ?? 0, 
+  // Criar as datas com horários em BRT
+  const matchDateBRT = set(fridayBRT, {
+    hours: matchHour,
+    minutes: matchMinute,
+    seconds: 0,
+    milliseconds: 0
+  });
+  
+  const confirmationDateBRT = set(fridayBRT, { 
+    hours: confirmationHour, 
+    minutes: confirmationMinute, 
     seconds: 0, 
     milliseconds: 0 
   });
-  const confirmationDeadline = fromZonedTime(confirmationBRT, timezone);
   
-  // Chegada 15 minutos antes
-  const arrivalBRT = new Date(fridayBRT);
-  arrivalBRT.setMinutes(arrivalBRT.getMinutes() - (options?.arrivalMinutesBefore ?? 15));
-  const arrivalDeadline = fromZonedTime(arrivalBRT, timezone);
+  const arrivalDateBRT = set(fridayBRT, {
+    hours: matchHour,
+    minutes: matchMinute - arrivalMinutesBefore,
+    seconds: 0,
+    milliseconds: 0
+  });
   
+  // Converter para UTC para armazenar no banco
+  const matchDate = fromZonedTime(matchDateBRT, timezone);
+  const confirmationDeadline = fromZonedTime(confirmationDateBRT, timezone);
+  const arrivalDeadline = fromZonedTime(arrivalDateBRT, timezone);
+  
+  // IMPORTANTE: O Drizzle converte Date para ISO string sem Z
+  // O MySQL interpreta como local time e adiciona o offset
+  // Solucao: Subtrair 3 horas (offset BRT) para compensar
+  const offset = 3 * 60 * 60 * 1000; // 3 horas em ms
   return {
-    matchDate,
-    confirmationDeadline,
-    arrivalDeadline,
+    matchDate: new Date(matchDate.getTime() - offset),
+    confirmationDeadline: new Date(confirmationDeadline.getTime() - offset),
+    arrivalDeadline: new Date(arrivalDeadline.getTime() - offset),
   };
 }
 

@@ -12,6 +12,7 @@ import { Activity, Banknote, CalendarClock, ClipboardList, Goal, QrCode, Setting
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { formatInTimeZone } from "date-fns-tz";
 
 type PlayerType = "line" | "goalkeeper" | "both";
 type PresenceStatus = "confirmed" | "pending" | "declined";
@@ -45,7 +46,8 @@ function money(cents = 0) {
 
 function dateTime(value?: Date | string | null) {
   if (!value) return "-";
-  return new Date(value).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  const date = new Date(value);
+  return formatInTimeZone(date, "America/Sao_Paulo", "dd/MM/yyyy, HH:mm");
 }
 
 const typeLabel: Record<PlayerType, string> = {

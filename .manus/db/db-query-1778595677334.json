@@ -1,0 +1,24 @@
+{
+  "query": "DELETE FROM attendances WHERE matchId = 60008; DELETE FROM matches WHERE id = 60008; SELECT * FROM matches ORDER BY id DESC LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2GFHmixSSd3JKEW.8512cbb676ca --database b5ezpFoDDKcYftXFGj7PDa --execute DELETE FROM attendances WHERE matchId = 60008; DELETE FROM matches WHERE id = 60008; SELECT * FROM matches ORDER BY id DESC LIMIT 1;",
+  "rows": [
+    {
+      "id": "60007",
+      "title": "Pelada de sexta-feira",
+      "matchDate": "2026-05-16 02:00:00",
+      "confirmationDeadline": "2026-05-15 21:00:00",
+      "arrivalDeadline": "2026-05-16 01:45:00",
+      "status": "scheduled",
+      "clockSeconds": "0",
+      "clockRunning": "0",
+      "createdAt": "2026-05-12 14:18:37",
+      "updatedAt": "2026-05-12 14:18:37",
+      "arrivalQrToken": "NULL",
+      "arrivalQrExpiresAt": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tmatchDate\tconfirmationDeadline\tarrivalDeadline\tstatus\tclockSeconds\tclockRunning\tcreatedAt\tupdatedAt\tarrivalQrToken\tarrivalQrExpiresAt\n60007\tPelada de sexta-feira\t2026-05-16 02:00:00\t2026-05-15 21:00:00\t2026-05-16 01:45:00\tscheduled\t0\t0\t2026-05-12 14:18:37\t2026-05-12 14:18:37\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 675
+}

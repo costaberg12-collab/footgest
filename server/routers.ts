@@ -44,6 +44,7 @@ const defaultSettings = {
   confirmationHour: 18,
   confirmationMinute: 0,
   arrivalMinutesBefore: 15,
+  regulationText: null as string | null,
 };
 
 async function ensureAppSettings() {
@@ -508,17 +509,16 @@ export const appRouter = router({
       await db.insert(appSettings).values({ id: 1, ...input }).onDuplicateKeyUpdate({ set: { ...input, updatedAt: new Date() } });
       const currentMatch = await db.select().from(matches).where(inArray(matches.status, ["scheduled", "in_progress"])).orderBy(asc(matches.matchDate)).limit(1);
       if (currentMatch[0]) {
-        const next = nextFridayMatch(new Date(currentMatch[0].matchDate), {
-          matchHour: input.matchHour,
-          matchMinute: input.matchMinute,
-          confirmationHour: input.confirmationHour,
-          confirmationMinute: input.confirmationMinute,
-          arrivalMinutesBefore: input.arrivalMinutesBefore,
-        });
+        const matchDate = new Date(currentMatch[0].matchDate);
+        const confirmationDate = new Date(matchDate);
+        const arrivalDate = new Date(matchDate);
+        matchDate.setHours(input.matchHour, input.matchMinute, 0, 0);
+        confirmationDate.setHours(input.confirmationHour, input.confirmationMinute, 0, 0);
+        arrivalDate.setHours(input.matchHour, input.matchMinute - input.arrivalMinutesBefore, 0, 0);
         await db.update(matches).set({
-          matchDate: next.matchDate,
-          confirmationDeadline: next.confirmationDeadline,
-          arrivalDeadline: next.arrivalDeadline,
+          matchDate,
+          confirmationDeadline: confirmationDate,
+          arrivalDeadline: arrivalDate,
         }).where(eq(matches.id, currentMatch[0].id));
       }
       return { success: true } as const;

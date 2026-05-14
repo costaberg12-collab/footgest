@@ -1,0 +1,8 @@
+{
+  "query": "DELETE FROM matches WHERE status IN ('scheduled', 'in_progress');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2GFHmixSSd3JKEW.8512cbb676ca --database b5ezpFoDDKcYftXFGj7PDa --execute DELETE FROM matches WHERE status IN ('scheduled', 'in_progress');",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1451 (23000) at line 1: Cannot delete or update a parent row: a foreign key constraint fails (`b5ezpfoddkcyftxfgj7pda`.`attendances`, CONSTRAINT `attendances_matchId_matches_id_fk` FOREIGN KEY (`matchId`) REFERENCES `matches` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION)"
+  ]
+}
