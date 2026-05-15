@@ -1,0 +1,20 @@
+{
+  "customDomain": "wbgsolutions.com.br",
+  "projectId": "b5ezpFoDDKcYftXFGj7PDa",
+  "status": "pending_dns_verification",
+  "dnsRecords": {
+    "A": {
+      "name": "@",
+      "type": "A",
+      "value": "104.21.16.89",
+      "ttl": 3600
+    },
+    "CNAME": {
+      "name": "www",
+      "type": "CNAME",
+      "value": "3000-i3i1vwsrzqspgeswm591x-839c036e.us1.manus.computer",
+      "ttl": 3600
+    }
+  },
+  "createdAt": "2026-05-15T15:09:00Z"
+}

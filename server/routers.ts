@@ -531,11 +531,10 @@ export const appRouter = router({
         // IMPORTANTE: O Drizzle converte Date para ISO string sem Z
         // O MySQL interpreta como local time e adiciona o offset
         // Solucao: Subtrair 3 horas (offset BRT) para compensar
-        const offset = 3 * 60 * 60 * 1000; // 3 horas em ms
         await db.update(matches).set({
-          matchDate: new Date(matchDateUTC.getTime() - offset),
-          confirmationDeadline: new Date(confirmationDateUTC.getTime() - offset),
-          arrivalDeadline: new Date(arrivalDateUTC.getTime() - offset),
+          matchDate: matchDateUTC,
+          confirmationDeadline: confirmationDateUTC,
+          arrivalDeadline: arrivalDateUTC,
         }).where(eq(matches.id, currentMatch[0].id));
       }
       return { success: true } as const;
