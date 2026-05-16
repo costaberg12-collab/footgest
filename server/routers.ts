@@ -13,6 +13,7 @@ import {
   payments,
   players,
   refereeAssignments,
+  regulationAcceptances,
   teamPlayers,
   teams,
 } from "../drizzle/schema";
@@ -616,6 +617,22 @@ export const appRouter = router({
       await db.update(players).set({ role: 'user' }).where(eq(players.id, input.playerId));
       return { success: true } as const;
     }),
+    acceptRegulation: protectedProcedure.mutation(async ({ ctx }) => {
+      const db = await requireDb();
+      const existing = await db.select().from(regulationAcceptances).where(eq(regulationAcceptances.userId, ctx.user.id)).limit(1);
+      if (existing[0]) {
+        return { success: true } as const;
+      }
+      await db.insert(regulationAcceptances).values({ userId: ctx.user.id, acceptedAt: new Date() });
+      return { success: true } as const;
+    }),
+
+    hasAcceptedRegulation: protectedProcedure.query(async ({ ctx }) => {
+      const db = await requireDb();
+      const acceptance = await db.select().from(regulationAcceptances).where(eq(regulationAcceptances.userId, ctx.user.id)).limit(1);
+      return { accepted: !!acceptance[0] } as const;
+    }),
+
     getAppSettings: protectedProcedure.query(async () => {
       const settings = await ensureAppSettings();
       return settings;

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
+import { trpc } from "@/lib/trpc";
 import { Goal, LayoutDashboard, LogOut, PanelLeft } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -46,10 +47,20 @@ export default function DashboardLayout({
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
   const { loading, user } = useAuth();
+  const [location, setLocation] = useLocation();
+  const { data: regulationStatus } = trpc.futgestao.hasAcceptedRegulation.useQuery(undefined, {
+    enabled: !!user && location !== '/regulamento',
+  });
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
   }, [sidebarWidth]);
+
+  useEffect(() => {
+    if (user && regulationStatus && !regulationStatus.accepted && location !== '/regulamento') {
+      setLocation('/regulamento');
+    }
+  }, [user, regulationStatus, location, setLocation]);
 
   if (loading) {
     return <DashboardLayoutSkeleton />
