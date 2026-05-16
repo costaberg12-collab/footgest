@@ -73,6 +73,8 @@ export default function Home() {
   const utils = trpc.useUtils();
   const overview = trpc.futgestao.overview.useQuery(undefined, { refetchInterval: 20000 });
   const stats = trpc.futgestao.stats.useQuery();
+  const appSettings = trpc.futgestao.getAppSettings.useQuery();
+  const isOwner = appSettings.data && user && appSettings.data.ownerId === user.id;
 
   const createPlayer = trpc.futgestao.createPlayer.useMutation({ onSuccess: () => refresh("Jogador cadastrado.") });
   const createMyPlayer = trpc.futgestao.createMyPlayer.useMutation({ onSuccess: () => refresh("Seu cadastro foi salvo.") });
@@ -91,6 +93,9 @@ export default function Home() {
   const confirmArrivalByQr = trpc.futgestao.confirmArrivalByQr.useMutation({ onSuccess: data => refresh(`Chegada registrada. Ordem ${data.arrivalOrder}.`) });
   const updateSettings = trpc.futgestao.updateSettings.useMutation({ onSuccess: () => refresh("Configurações salvas.") });
   const uploadLogo = trpc.futgestao.uploadLogo.useMutation({ onSuccess: result => { setSettingsForm(form => ({ ...form, logoUrl: result.url })); refresh("Logo enviada."); } });
+  const listPlayersForPromotion = trpc.futgestao.listPlayersForAdminPromotion.useQuery();
+  const promoteToAdmin = trpc.futgestao.promoteToAdmin.useMutation({ onSuccess: () => { refresh("Jogador promovido a administrador."); listPlayersForPromotion.refetch(); } });
+  const demoteFromAdmin = trpc.futgestao.demoteFromAdmin.useMutation({ onSuccess: () => { refresh("Permissões de administrador removidas."); listPlayersForPromotion.refetch(); } });
 
   const [playerForm, setPlayerForm] = useState<FormState>(initialPlayerForm);
   const [guestForm, setGuestForm] = useState({ hostPlayerId: "0", name: "", amount: "10" });
@@ -796,6 +801,49 @@ export default function Home() {
               </form>
             </CardContent>
           </Card>
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Gerenciamento de Admins</CardTitle>
+              <CardDescription>Promova ou remova permissões de administrador para os jogadores.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <div>
+                <h4 className="font-semibold mb-3">Administradores atuais</h4>
+                <div className="grid gap-2">
+                  {listPlayersForPromotion.data?.filter(p => p.role === 'admin').map(player => (
+                    <div key={player.id} className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                      <span className="font-medium text-emerald-900">{player.name}</span>
+                      <Button size="sm" variant="destructive" onClick={() => demoteFromAdmin.mutate({ playerId: player.id })}>Remover</Button>
+                    </div>
+                  ))}
+                  {!listPlayersForPromotion.data?.some(p => p.role === 'admin') && <p className="text-sm text-muted-foreground">Nenhum administrador além de você.</p>}
+                </div>
+              </div>
+              <Separator />
+              <div>
+                <h4 className="font-semibold mb-3">Promover jogador a admin</h4>
+                <div className="grid gap-2">
+                  {listPlayersForPromotion.data?.filter(p => p.role === 'user').map(player => (
+                    <div key={player.id} className="flex items-center justify-between rounded-lg border p-3">
+                      <span className="font-medium">{player.name}</span>
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => promoteToAdmin.mutate({ playerId: player.id })}>Promover</Button>
+                    </div>
+                  ))}
+                  {!listPlayersForPromotion.data?.some(p => p.role === 'user') && <p className="text-sm text-muted-foreground">Todos os jogadores já são administradores.</p>}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          {isOwner && <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Painel de Controle</CardTitle>
+              <CardDescription>Acesse o painel de controle completo para gerenciar dominios, configuracoes avancadas e muito mais.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              <p className="text-sm text-muted-foreground">Clique no botao abaixo para acessar o painel de controle, onde voce pode configurar seu dominio customizado e outras opcoes avancadas.</p>
+              <Button onClick={() => window.open("https://app.manus.im", "_blank")} className="bg-blue-600 hover:bg-blue-700">Acessar Painel de Controle</Button>
+            </CardContent>
+          </Card>}
         </TabsContent>}
 
         <TabsContent value="stats" className="grid gap-4 md:grid-cols-3">

@@ -33,6 +33,7 @@ async function requireDb() {
 
 const defaultSettings = {
   id: 1,
+  ownerId: null as number | null,
   appName: "FutGestão",
   appDescription: "Controle a confirmação, os convidados, o caixa, os times, a arbitragem e as estatísticas da sua turma em um único painel responsivo para web e celular.",
   primaryColor: "#16a34a",
@@ -565,6 +566,48 @@ export const appRouter = router({
         cards: [...playerStats].sort((a, b) => b.yellowCards + b.redCards - (a.yellowCards + a.redCards)),
         presence: [...playerStats].sort((a, b) => b.confirmedPresence - a.confirmedPresence),
       };
+    }),
+
+    listPlayersForAdminPromotion: adminProcedure.query(async () => {
+      const db = await requireDb();
+      const users = await db.select({
+        id: players.id,
+        name: players.name,
+        role: players.role,
+        active: players.active,
+      }).from(players).where(eq(players.active, true)).orderBy(asc(players.name));
+      return users;
+    }),
+
+    promoteToAdmin: adminProcedure.input(z.object({
+      playerId: z.number().int().positive(),
+    })).mutation(async ({ input }) => {
+      const db = await requireDb();
+      const player = await db.select().from(players).where(eq(players.id, input.playerId)).limit(1);
+      if (!player[0]) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Jogador nao encontrado.' });
+      }
+      await db.update(players).set({ role: 'admin' }).where(eq(players.id, input.playerId));
+      return { success: true } as const;
+    }),
+
+    demoteFromAdmin: adminProcedure.input(z.object({
+      playerId: z.number().int().positive(),
+    })).mutation(async ({ input, ctx }) => {
+      const db = await requireDb();
+      if (input.playerId === ctx.user.id) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Voce nao pode remover suas proprias permissoes de administrador.' });
+      }
+      const player = await db.select().from(players).where(eq(players.id, input.playerId)).limit(1);
+      if (!player[0]) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Jogador nao encontrado.' });
+      }
+      await db.update(players).set({ role: 'user' }).where(eq(players.id, input.playerId));
+      return { success: true } as const;
+    }),
+    getAppSettings: protectedProcedure.query(async () => {
+      const settings = await ensureAppSettings();
+      return settings;
     }),
   }),
 });

@@ -1,0 +1,2 @@
+ALTER TABLE `appSettings` ADD `ownerId` int;--> statement-breakpoint
+ALTER TABLE `appSettings` ADD CONSTRAINT `appSettings_ownerId_users_id_fk` FOREIGN KEY (`ownerId`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;

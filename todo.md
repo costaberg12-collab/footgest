@@ -100,4 +100,16 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 
 - [x] Horários não atualizam após salvar nas configurações (continuam com valores antigos) - CORRIGIDO: updateSettings agora atualiza partidas com status 'in_progress' além de 'scheduled'
 - [x] Horário de confirmação deve ser no mesmo dia do jogo (atualmente está no dia anterior)
-- [ ] Campo de horário de confirmação deve ser editável (permitir escolher hora e minuto)
+- [x] Campo de horário de confirmação deve ser editável (permitir escolher hora e minuto) - CORRIGIDO
+
+## Funcionalidades administrativas solicitadas
+
+- [x] Implementar seção de Gerenciamento de Admins nas Configurações
+- [x] Permitir admin promover/remover outros admins na aplicação
+- [x] Adicionar coluna role à tabela players
+- [x] Criar procedures tRPC para promover/remover admins
+- [x] Botão de Painel de Controle visível apenas para o fundador
+- [x] Domínio customizado wbgsolutions.com.br configurado no Registro.br
+- [x] Registros DNS A e CNAME adicionados no Registro.br
+- [x] Remover todas as referências ao "Manus" da interface
+- [x] Configurar domínio customizado nos servidores do Manus

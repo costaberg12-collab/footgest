@@ -28,6 +28,7 @@ export const users = mysqlTable("users", {
 
 export const appSettings = mysqlTable("appSettings", {
   id: int("id").primaryKey(),
+  ownerId: int("ownerId").references(() => users.id),
   appName: varchar("appName", { length: 80 }).default("FutGestão").notNull(),
   appDescription: text("appDescription"),
   primaryColor: varchar("primaryColor", { length: 16 }).default("#16a34a").notNull(),
@@ -53,6 +54,7 @@ export const players = mysqlTable("players", {
   monthlyFeeCents: int("monthlyFeeCents").default(0).notNull(),
   isMonthlyMember: boolean("isMonthlyMember").default(true).notNull(),
   isRefereeAuthorized: boolean("isRefereeAuthorized").default(false).notNull(),
+  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   active: boolean("active").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

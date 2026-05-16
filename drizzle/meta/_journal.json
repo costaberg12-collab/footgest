@@ -36,6 +36,20 @@
       "when": 1778506842692,
       "tag": "0004_aberrant_tarot",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1778866640112,
+      "tag": "0005_dear_jean_grey",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1778868912091,
+      "tag": "0006_awesome_may_parker",
+      "breakpoints": true
     }
   ]
 }
