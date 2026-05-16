@@ -119,6 +119,7 @@ export default function Home() {
     confirmationMinute: "0",
     arrivalMinutesBefore: "15",
     regulationText: "",
+    recurringDays: "[5]",
   });
 
   const qrRef = useRef<SVGSVGElement>(null);
@@ -245,6 +246,7 @@ export default function Home() {
       confirmationMinute: String(data.settings.confirmationMinute ?? 0),
       arrivalMinutesBefore: String(data.settings.arrivalMinutesBefore ?? 15),
       regulationText: data.settings.regulationText ?? "",
+      recurringDays: data.settings.recurringDays ?? "[5]",
     });
   }, [data?.settings]);
 
@@ -263,7 +265,7 @@ export default function Home() {
   }, [data?.match.clockRunning]);
 
   const isAdmin = user?.role === "admin";
-  const arrivalQrUrl = data?.match.arrivalQrToken ? `${window.location.origin}/?chegada=${data.match.arrivalQrToken}` : "";
+  const arrivalQrUrl = data?.match.arrivalQrToken ? `${window.location.origin}/chegada?token=${data.match.arrivalQrToken}` : "";
   const brandStyle = data?.settings ? ({ "--brand-primary": data.settings.primaryColor, "--brand-secondary": data.settings.secondaryColor } as React.CSSProperties) : undefined;
   const confirmedCount = data?.players.filter(player => player.attendance?.status === "confirmed").length ?? 0;
   const pendingCount = data?.players.filter(player => (player.attendance?.status ?? "pending") === "pending").length ?? 0;
@@ -654,6 +656,8 @@ export default function Home() {
                   confirmationHour: Number(settingsForm.confirmationHour),
                   confirmationMinute: Number(settingsForm.confirmationMinute),
                   arrivalMinutesBefore: Number(settingsForm.arrivalMinutesBefore),
+                  recurringDays: settingsForm.recurringDays,
+                  regulationText: settingsForm.regulationText,
                 });
               }}>
                 <Field label="Nome do app">
@@ -701,6 +705,8 @@ export default function Home() {
                   confirmationHour: Number(settingsForm.confirmationHour),
                   confirmationMinute: Number(settingsForm.confirmationMinute),
                   arrivalMinutesBefore: Number(settingsForm.arrivalMinutesBefore),
+                  recurringDays: settingsForm.recurringDays,
+                  regulationText: settingsForm.regulationText,
                 });
               }}>
                 <Field label="Horário do jogo">
@@ -717,6 +723,49 @@ export default function Home() {
                 </Field>
                 <Field label="Minutos antes para chegar no campo">
                   <Input type="number" min="0" value={settingsForm.arrivalMinutesBefore} onChange={e => setSettingsForm({ ...settingsForm, arrivalMinutesBefore: e.target.value })} />
+                </Field>
+                <Field label="Dias da semana para partidas">
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { day: 0, label: 'Dom' },
+                      { day: 1, label: 'Seg' },
+                      { day: 2, label: 'Ter' },
+                      { day: 3, label: 'Qua' },
+                      { day: 4, label: 'Qui' },
+                      { day: 5, label: 'Sex' },
+                      { day: 6, label: 'Sab' },
+                    ].map(({ day, label }) => {
+                      let recurringDaysArray: number[] = [5];
+                      try {
+                        const parsed = JSON.parse(settingsForm.recurringDays);
+                        if (Array.isArray(parsed)) {
+                          recurringDaysArray = parsed;
+                        }
+                      } catch (e) {
+                        // Fallback to default
+                      }
+                      const isSelected = recurringDaysArray.includes(day);
+                      return (
+                        <button
+                          key={day}
+                          type="button"
+                          onClick={() => {
+                            const updated = isSelected
+                              ? recurringDaysArray.filter((d: number) => d !== day)
+                              : [...recurringDaysArray, day].sort((a: number, b: number) => a - b);
+                            setSettingsForm({ ...settingsForm, recurringDays: JSON.stringify(updated) });
+                          }}
+                          className={`rounded-lg border-2 py-2 px-3 font-semibold transition-colors ${
+                            isSelected
+                              ? 'border-green-500 bg-green-100 text-green-900'
+                              : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </Field>
                 <Button type="submit">Salvar horários</Button>
               </form>
@@ -794,6 +843,7 @@ export default function Home() {
                   confirmationMinute: Number(settingsForm.confirmationMinute),
                   arrivalMinutesBefore: Number(settingsForm.arrivalMinutesBefore),
                   regulationText: settingsForm.regulationText,
+                  recurringDays: settingsForm.recurringDays,
                 });
               }}>
                 <textarea value={settingsForm.regulationText} onChange={e => setSettingsForm({ ...settingsForm, regulationText: e.target.value })} placeholder="Digite o regulamento aqui..." className="min-h-48 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />

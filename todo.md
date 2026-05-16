@@ -93,8 +93,10 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 
 - [x] Adicionar campo de regulamento nas configurações do admin (textarea para editar)
 - [ ] Criar tela de aceitar regulamento na primeira vez para novos jogadores
-- [ ] Implementar sistema de múltiplos agendamentos de jogo por semana (segunda, quarta, sexta, etc.)
-- [ ] Criar partidas automaticamente baseado nos agendamentos
+- [x] Implementar sistema de múltiplos agendamentos de jogo por semana (segunda, quarta, sexta, etc.)
+- [x] Criar partidas automaticamente baseado nos agendamentos
+- [x] Implementar tela de confirmação de chegada via QR Code
+- [x] Permitir que o QR Code registre a hora exata de chegada do jogador
 
 ## Bugs Encontrados
 

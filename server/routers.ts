@@ -21,7 +21,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
 import { storagePut } from "./storage";
-import { calculateFinanceSummary, canConfirmAttendance, generateTeamsWithWaitingList, guestsAreReleased, nextFridayMatch, selectRefereeRotation, summarizePlayerStats } from "./futgestaoRules";
+import { calculateFinanceSummary, canConfirmAttendance, generateTeamsWithWaitingList, guestsAreReleased, nextFridayMatch, nextMatchDate, selectRefereeRotation, summarizePlayerStats } from "./futgestaoRules";
 
 async function requireDb() {
   const db = await getDb();
@@ -46,6 +46,7 @@ const defaultSettings = {
   confirmationMinute: 0,
   arrivalMinutesBefore: 15,
   regulationText: null as string | null,
+  recurringDays: "[5]" as string,
 };
 
 async function ensureAppSettings() {
@@ -77,7 +78,16 @@ async function ensureCurrentMatch() {
   if (existing[0]) return existing[0];
 
   const settings = await ensureAppSettings();
-  const next = nextFridayMatch(new Date(), {
+  let recurringDays: number[] = [5];
+  try {
+    const parsed = JSON.parse(settings.recurringDays);
+    if (Array.isArray(parsed)) {
+      recurringDays = parsed;
+    }
+  } catch (e) {
+    // Fallback to default
+  }
+  const next = nextMatchDate(new Date(), recurringDays, {
     matchHour: Number(settings.matchHour),
     matchMinute: Number(settings.matchMinute),
     confirmationHour: Number(settings.confirmationHour),
@@ -505,6 +515,7 @@ export const appRouter = router({
       confirmationMinute: z.number().int().min(0).max(59),
       arrivalMinutesBefore: z.number().int().min(0).max(180),
       regulationText: z.string().max(10000).optional().nullable(),
+      recurringDays: z.string().min(3).max(255),
     })).mutation(async ({ input }) => {
       const db = await requireDb();
       await db.insert(appSettings).values({ id: 1, ...input }).onDuplicateKeyUpdate({ set: { ...input, updatedAt: new Date() } });

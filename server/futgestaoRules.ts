@@ -138,6 +138,83 @@ export function selectRefereeRotation(params: {
   }));
 }
 
+export function nextMatchDate(now = new Date(), recurringDays: number[], options?: {
+  matchHour?: number;
+  matchMinute?: number;
+  confirmationHour?: number;
+  confirmationMinute?: number;
+  arrivalMinutesBefore?: number;
+}) {
+  const timezone = 'America/Sao_Paulo';
+  const matchHour = options?.matchHour ?? 20;
+  const matchMinute = options?.matchMinute ?? 0;
+  const confirmationHour = options?.confirmationHour ?? 18;
+  const confirmationMinute = options?.confirmationMinute ?? 0;
+  const arrivalMinutesBefore = options?.arrivalMinutesBefore ?? 15;
+  
+  // Calcular próxima data baseada em dias recorrentes
+  const nowBRT = toZonedTime(now, timezone);
+  const dayBRT = nowBRT.getDay();
+  
+  // Encontrar o próximo dia que está em recurringDays
+  let daysToAdd = 0;
+  let found = false;
+  
+  for (let i = 0; i < 7; i++) {
+    const checkDay = (dayBRT + i) % 7;
+    if (recurringDays.includes(checkDay)) {
+      daysToAdd = i;
+      if (i === 0) {
+        // Se hoje é um dia recorrente, adicionar 7 dias
+        daysToAdd = 7;
+      }
+      found = true;
+      break;
+    }
+  }
+  
+  if (!found) {
+    // Se nenhum dia foi encontrado, usar sexta (5)
+    daysToAdd = (5 - dayBRT + 7) % 7;
+    if (daysToAdd === 0) daysToAdd = 7;
+  }
+  
+  const nextDateBRT = addDays(nowBRT, daysToAdd);
+  
+  // Criar as datas com horários em BRT
+  const matchDateBRT = set(nextDateBRT, {
+    hours: matchHour,
+    minutes: matchMinute,
+    seconds: 0,
+    milliseconds: 0
+  });
+  
+  const confirmationDateBRT = set(nextDateBRT, { 
+    hours: confirmationHour, 
+    minutes: confirmationMinute, 
+    seconds: 0, 
+    milliseconds: 0 
+  });
+  
+  const arrivalDateBRT = set(nextDateBRT, {
+    hours: matchHour,
+    minutes: matchMinute - arrivalMinutesBefore,
+    seconds: 0,
+    milliseconds: 0
+  });
+  
+  // Converter para UTC para armazenar no banco
+  const matchDate = fromZonedTime(matchDateBRT, timezone);
+  const confirmationDeadline = fromZonedTime(confirmationDateBRT, timezone);
+  const arrivalDeadline = fromZonedTime(arrivalDateBRT, timezone);
+  
+  return {
+    matchDate,
+    confirmationDeadline,
+    arrivalDeadline,
+  };
+}
+
 export function nextFridayMatch(now = new Date(), options?: {
   matchHour?: number;
   matchMinute?: number;

@@ -1,0 +1,1 @@
+ALTER TABLE `appSettings` ADD `recurringDays` varchar(255) DEFAULT '5' NOT NULL;

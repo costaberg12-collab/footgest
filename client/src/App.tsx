@@ -6,6 +6,7 @@ import DashboardLayout from "./components/DashboardLayout";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import ArrivalConfirmation from "./pages/ArrivalConfirmation";
 
 function Router() {
   return (
@@ -15,6 +16,7 @@ function Router() {
           <Home />
         </DashboardLayout>
       </Route>
+      <Route path="/chegada" component={ArrivalConfirmation} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

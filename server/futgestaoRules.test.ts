@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateFinanceSummary, canConfirmAttendance, generateTeams, generateTeamsWithWaitingList, guestsAreReleased, nextFridayMatch, selectRefereeRotation, summarizePlayerStats, type TeamCandidate } from "./futgestaoRules";
+import { calculateFinanceSummary, canConfirmAttendance, generateTeams, generateTeamsWithWaitingList, guestsAreReleased, nextFridayMatch, nextMatchDate, selectRefereeRotation, summarizePlayerStats, type TeamCandidate } from "./futgestaoRules";
 
 function candidate(id: number, type: TeamCandidate["type"], arrivalOrder = id): TeamCandidate {
   return { id, name: `Jogador ${id}`, type, arrivalOrder };
@@ -201,5 +201,51 @@ describe("futgestaoRules", () => {
       { playerId: 1, name: "João", goals: 1, yellowCards: 1, redCards: 0, confirmedPresence: 1 },
       { playerId: 2, name: "Carlos", goals: 0, yellowCards: 0, redCards: 1, confirmedPresence: 1 },
     ]);
+  });
+
+  it("calcula a próxima sexta-feira quando nenhum dia recorrente é especificado", () => {
+    // 2026-05-14 é uma quinta-feira
+    const now = new Date("2026-05-14T10:00:00-03:00");
+    const result = nextMatchDate(now, [5], {
+      matchHour: 20,
+      matchMinute: 0,
+      confirmationHour: 18,
+      confirmationMinute: 0,
+      arrivalMinutesBefore: 15,
+    });
+
+    // Deve ser sexta-feira (2026-05-15) às 20:00
+    expect(result.matchDate.getUTCDate()).toBe(15);
+    expect(result.matchDate.getUTCMonth()).toBe(4); // Maio (0-indexed)
+  });
+
+  it("calcula a próxima segunda-feira quando segunda é o dia recorrente", () => {
+    // 2026-05-14 é uma quinta-feira
+    const now = new Date("2026-05-14T10:00:00-03:00");
+    const result = nextMatchDate(now, [1], {
+      matchHour: 20,
+      matchMinute: 0,
+      confirmationHour: 18,
+      confirmationMinute: 0,
+      arrivalMinutesBefore: 15,
+    });
+
+    // Deve ser segunda-feira (2026-05-18) às 20:00
+    expect(result.matchDate.getUTCDate()).toBe(18);
+  });
+
+  it("calcula múltiplos dias recorrentes corretamente", () => {
+    // 2026-05-14 é uma quinta-feira
+    const now = new Date("2026-05-14T10:00:00-03:00");
+    const result = nextMatchDate(now, [1, 3, 5], {
+      matchHour: 20,
+      matchMinute: 0,
+      confirmationHour: 18,
+      confirmationMinute: 0,
+      arrivalMinutesBefore: 15,
+    });
+
+    // Deve ser sexta-feira (2026-05-15) porque é o próximo dia na lista [1, 3, 5]
+    expect(result.matchDate.getUTCDate()).toBe(15);
   });
 });
