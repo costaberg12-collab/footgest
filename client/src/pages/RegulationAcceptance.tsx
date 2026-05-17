@@ -105,6 +105,7 @@ function RegulationAcceptance() {
                 <p className="mt-2 text-sm text-gray-600">O administrador ainda não configurou um regulamento para o grupo.</p>
               </div>
               <Button
+                type="button"
                 onClick={handleBackToDashboard}
                 variant="outline"
                 className="w-full"
