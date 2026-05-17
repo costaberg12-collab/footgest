@@ -629,6 +629,12 @@ export const appRouter = router({
 
     hasAcceptedRegulation: protectedProcedure.query(async ({ ctx }) => {
       const db = await requireDb();
+      const settings = await ensureAppSettings();
+      // Se não há regulamento configurado, considerar como aceito
+      if (!settings.regulationText || !settings.regulationText.trim()) {
+        return { accepted: true } as const;
+      }
+      // Se há regulamento, verificar se o usuário aceitou
       const acceptance = await db.select().from(regulationAcceptances).where(eq(regulationAcceptances.userId, ctx.user.id)).limit(1);
       return { accepted: !!acceptance[0] } as const;
     }),
