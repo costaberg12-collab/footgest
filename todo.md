@@ -115,3 +115,8 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - [x] Registros DNS A e CNAME adicionados no Registro.br
 - [x] Remover todas as referências ao "Manus" da interface
 - [x] Configurar domínio customizado nos servidores do Manus
+
+## Bugs Corrigidos em 2026-05-17
+
+- [x] Bug: Sistema de agendamento automático não criava nova partida quando a data atual passava (ex: dia 15 passou, deveria criar para dia 22) - CORRIGIDO: nextMatchDate agora verifica se a hora da partida já passou hoje antes de decidir se cria para hoje ou próxima semana
+- [x] Bug: useAuth duplicado no DashboardLayout causando erro de compilação - CORRIGIDO: removido o segundo useAuth

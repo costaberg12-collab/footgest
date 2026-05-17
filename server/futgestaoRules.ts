@@ -165,8 +165,21 @@ export function nextMatchDate(now = new Date(), recurringDays: number[], options
     if (recurringDays.includes(checkDay)) {
       daysToAdd = i;
       if (i === 0) {
-        // Se hoje é um dia recorrente, adicionar 7 dias
-        daysToAdd = 7;
+        // Se hoje é um dia recorrente, verificar se a hora da partida já passou
+        const matchTimeToday = set(nowBRT, {
+          hours: matchHour,
+          minutes: matchMinute,
+          seconds: 0,
+          milliseconds: 0
+        });
+        
+        // Se a hora da partida ainda não passou hoje, usar hoje
+        if (nowBRT.getTime() < matchTimeToday.getTime()) {
+          daysToAdd = 0;
+        } else {
+          // Se a hora da partida já passou, usar próxima semana
+          daysToAdd = 7;
+        }
       }
       found = true;
       break;
