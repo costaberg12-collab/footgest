@@ -43,6 +43,10 @@ function RegulationAcceptance() {
     acceptRegulation.mutate();
   }
 
+  function handleBackToDashboard() {
+    setLocation("/");
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-2xl shadow-lg">
@@ -101,7 +105,7 @@ function RegulationAcceptance() {
                 <p className="mt-2 text-sm text-gray-600">O administrador ainda não configurou um regulamento para o grupo.</p>
               </div>
               <Button
-                onClick={() => setLocation("/")}
+                onClick={handleBackToDashboard}
                 variant="outline"
                 className="w-full"
               >
