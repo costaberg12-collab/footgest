@@ -11,11 +11,13 @@ import {
   guests,
   matches,
   payments,
+  playerInvites,
   players,
   refereeAssignments,
   regulationAcceptances,
   teamPlayers,
   teams,
+  users,
 } from "../drizzle/schema";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -642,6 +644,85 @@ export const appRouter = router({
     getAppSettings: protectedProcedure.query(async () => {
       const settings = await ensureAppSettings();
       return settings;
+    }),
+
+    invitePlayer: adminProcedure
+      .input(
+        z.object({
+          email: z.string().email(),
+          name: z.string().min(1),
+          phone: z.string().optional(),
+          type: z.enum(["line", "goalkeeper", "both"]).default("line"),
+          monthlyFeeCents: z.number().default(0),
+          isMonthlyMember: z.boolean().default(true),
+          isRefereeAuthorized: z.boolean().default(false),
+        }),
+      )
+      .mutation(async ({ input, ctx }) => {
+        const db = await requireDb();
+        await db.insert(playerInvites).values({
+          email: input.email,
+          name: input.name,
+          phone: input.phone,
+          type: input.type,
+          monthlyFeeCents: input.monthlyFeeCents,
+          isMonthlyMember: input.isMonthlyMember,
+          isRefereeAuthorized: input.isRefereeAuthorized,
+          invitedBy: ctx.user.id,
+          status: "pending",
+        });
+        return { success: true } as const;
+      }),
+
+    getPendingInvites: adminProcedure.query(async () => {
+      const db = await requireDb();
+      const invites = await db
+        .select()
+        .from(playerInvites)
+        .where(eq(playerInvites.status, "pending"))
+        .orderBy(desc(playerInvites.createdAt));
+      return invites;
+    }),
+
+    getPlayerByEmail: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .query(async ({ input }) => {
+        const db = await requireDb();
+        const user = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, input.email))
+          .limit(1);
+        if (!user[0]) {
+          return { found: false } as const;
+        }
+        const player = await db
+          .select()
+          .from(players)
+          .where(eq(players.userId, user[0].id))
+          .limit(1);
+        return { found: !!player[0] } as const;
+      }),
+
+    getPlayerStats: protectedProcedure.query(async ({ ctx }) => {
+      const db = await requireDb();
+      const player = await db.select().from(players).where(eq(players.userId, ctx.user.id)).limit(1);
+      if (!player[0]) {
+        return { presence: 0, goalsPerMatch: 0, totalGoals: 0, matchesAttended: 0 } as const;
+      }
+      const playerId = player[0].id;
+      const playerAttendances = await db
+        .select()
+        .from(attendances)
+        .where(and(eq(attendances.playerId, playerId), eq(attendances.status, "confirmed")));
+      const matchesAttended = playerAttendances.length;
+      const goals = await db
+        .select()
+        .from(gameEvents)
+        .where(and(eq(gameEvents.playerId, playerId), eq(gameEvents.type, "goal")));
+      const totalGoals = goals.length;
+      const goalsPerMatch = matchesAttended > 0 ? totalGoals / matchesAttended : 0;
+      return { presence: matchesAttended, goalsPerMatch: parseFloat(goalsPerMatch.toFixed(2)), totalGoals, matchesAttended } as const;
     }),
   }),
 });

@@ -115,3 +115,12 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - [x] Registros DNS A e CNAME adicionados no Registro.br
 - [x] Remover todas as referências ao "Manus" da interface
 - [x] Configurar domínio customizado nos servidores do Manus
+
+
+## Novas funcionalidades em desenvolvimento (2026-05-17)
+
+- [x] Sistema de convite por email para novos jogadores
+- [x] Validação de email com feedback claro quando jogador não está cadastrado
+- [x] Dashboard de estatísticas pessoais do jogador
+- [x] Cálculo de média de gols por partida (gols / partidas que compareceu)
+- [ ] Integração com WhatsApp para enviar convites no grupo

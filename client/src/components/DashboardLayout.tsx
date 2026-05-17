@@ -66,6 +66,12 @@ export default function DashboardLayout({
     return <DashboardLayoutSkeleton />
   }
 
+  // Query para verificar se o email está cadastrado
+  const { data: playerData } = trpc.futgestao.getPlayerByEmail.useQuery(
+    { email: user?.email || "" },
+    { enabled: !!user && !!user.email }
+  );
+
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -86,6 +92,37 @@ export default function DashboardLayout({
             className="w-full shadow-lg hover:shadow-xl transition-all"
           >
               Entrar
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Validar se o email do usuário está cadastrado como jogador
+  if (user && user.email && playerData && !playerData.found) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
+          <div className="flex flex-col items-center gap-6">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100">
+              <span className="text-2xl">⚠️</span>
+            </div>
+            <h1 className="text-2xl font-semibold tracking-tight text-center">
+              Email não cadastrado
+            </h1>
+            <p className="text-sm text-muted-foreground text-center max-w-sm">
+              O email <strong>{user.email}</strong> não está cadastrado no grupo. Verifique se está usando o email correto ou contate o administrador.
+            </p>
+          </div>
+          <Button
+            onClick={() => {
+              window.location.href = getLoginUrl();
+            }}
+            variant="outline"
+            size="lg"
+            className="w-full"
+          >
+            Entrar com outro email
           </Button>
         </div>
       </div>

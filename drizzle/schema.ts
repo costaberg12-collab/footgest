@@ -197,4 +197,21 @@ export const regulationAcceptances = mysqlTable("regulationAcceptances", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
+export const playerInvites = mysqlTable("playerInvites", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull(),
+  name: varchar("name", { length: 160 }).notNull(),
+  phone: varchar("phone", { length: 32 }),
+  type: mysqlEnum("type", ["line", "goalkeeper", "both"]).default("line").notNull(),
+  monthlyFeeCents: int("monthlyFeeCents").default(0).notNull(),
+  isMonthlyMember: boolean("isMonthlyMember").default(true).notNull(),
+  isRefereeAuthorized: boolean("isRefereeAuthorized").default(false).notNull(),
+  invitedBy: int("invitedBy").notNull().references(() => users.id),
+  status: mysqlEnum("status", ["pending", "accepted", "declined"]).default("pending").notNull(),
+  acceptedAt: timestamp("acceptedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export type RegulationAcceptance = typeof regulationAcceptances.$inferSelect;
+export type PlayerInvite = typeof playerInvites.$inferSelect;
