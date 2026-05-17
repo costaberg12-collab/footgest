@@ -2,13 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 
 function RegulationAcceptance() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [hasAccepted, setHasAccepted] = useState(false);
   const [regulationText, setRegulationText] = useState("");
@@ -43,9 +43,10 @@ function RegulationAcceptance() {
     acceptRegulation.mutate();
   }
 
-  function handleBackToDashboard() {
+  const handleBackClick = () => {
+    console.log("Botão clicado, redirecionando para /");
     setLocation("/");
-  }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -79,6 +80,7 @@ function RegulationAcceptance() {
               </div>
 
               <Button
+                type="button"
                 onClick={handleAccept}
                 disabled={isLoading || !hasAccepted}
                 className="w-full"
@@ -106,10 +108,11 @@ function RegulationAcceptance() {
               </div>
               <Button
                 type="button"
-                onClick={handleBackToDashboard}
+                onClick={handleBackClick}
                 variant="outline"
                 className="w-full"
               >
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Voltar ao Dashboard
               </Button>
             </div>
