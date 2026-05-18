@@ -10,9 +10,7 @@ import {
   gameEvents,
   guests,
   matches,
-  monthlyFees,
   payments,
-  playerDebts,
   playerInvites,
   players,
   refereeAssignments,
@@ -726,52 +724,6 @@ export const appRouter = router({
       const goalsPerMatch = matchesAttended > 0 ? totalGoals / matchesAttended : 0;
       return { presence: matchesAttended, goalsPerMatch: parseFloat(goalsPerMatch.toFixed(2)), totalGoals, matchesAttended } as const;
     }),
-
-    addPlayerDebt: adminProcedure
-      .input(z.object({ playerId: z.number(), amountCents: z.number(), reason: z.string(), type: z.enum(["monthly_fee", "yellow_card", "red_card", "no_show", "other"]) }))
-      .mutation(async ({ input }) => {
-        const db = await requireDb();
-        await db.insert(playerDebts).values({
-          playerId: input.playerId,
-          amountCents: input.amountCents,
-          reason: input.reason,
-          type: input.type,
-        });
-        return { success: true };
-      }),
-
-    getPlayerDebts: protectedProcedure
-      .input(z.object({ playerId: z.number().optional() }))
-      .query(async ({ ctx, input }) => {
-        const db = await requireDb();
-        let debts;
-        if (input.playerId) {
-          debts = await db.select().from(playerDebts).where(eq(playerDebts.playerId, input.playerId));
-        } else {
-          const player = await db.select().from(players).where(eq(players.userId, ctx.user.id)).limit(1);
-          if (!player[0]) return { debts: [], totalCents: 0 };
-          debts = await db.select().from(playerDebts).where(eq(playerDebts.playerId, player[0].id));
-        }
-        const totalCents = debts.reduce((sum, d) => sum + (d.isPaid ? 0 : d.amountCents), 0);
-        return { debts, totalCents };
-      }),
-
-    updateFinancialRules: adminProcedure
-      .input(z.object({
-        monthlyFeeCents: z.number().optional(),
-        yellowCardFineCents: z.number().optional(),
-        redCardFineCents: z.number().optional(),
-        noShowFineCents: z.number().optional(),
-        enableMonthlyFee: z.boolean().optional(),
-        enableYellowCardFine: z.boolean().optional(),
-        enableRedCardFine: z.boolean().optional(),
-        enableNoShowFine: z.boolean().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        const db = await requireDb();
-        await db.update(appSettings).set(input).where(eq(appSettings.id, 1));
-        return { success: true };
-      }),
   }),
 });
 
