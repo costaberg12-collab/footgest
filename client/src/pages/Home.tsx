@@ -123,6 +123,14 @@ export default function Home() {
     arrivalMinutesBefore: "15",
     regulationText: "",
     recurringDays: "[5]",
+    monthlyFee: "0",
+    yellowCardFine: "10",
+    redCardFine: "50",
+    noShowFine: "5",
+    enableMonthlyFee: false,
+    enableYellowCardFine: true,
+    enableRedCardFine: true,
+    enableNoShowFine: true,
   });
 
   const qrRef = useRef<SVGSVGElement>(null);
@@ -250,6 +258,14 @@ export default function Home() {
       arrivalMinutesBefore: String(data.settings.arrivalMinutesBefore ?? 15),
       regulationText: data.settings.regulationText ?? "",
       recurringDays: data.settings.recurringDays ?? "[5]",
+      monthlyFee: String((data.settings.monthlyFeeCents ?? 0) / 100).replace(".", ","),
+      yellowCardFine: String((data.settings.yellowCardFineCents ?? 1000) / 100).replace(".", ","),
+      redCardFine: String((data.settings.redCardFineCents ?? 5000) / 100).replace(".", ","),
+      noShowFine: String((data.settings.noShowFineCents ?? 500) / 100).replace(".", ","),
+      enableMonthlyFee: data.settings.enableMonthlyFee ?? false,
+      enableYellowCardFine: data.settings.enableYellowCardFine ?? true,
+      enableRedCardFine: data.settings.enableRedCardFine ?? true,
+      enableNoShowFine: data.settings.enableNoShowFine ?? true,
     });
   }, [data?.settings]);
 
@@ -943,6 +959,54 @@ export default function Home() {
                   {!listPlayersForPromotion.data?.some(p => p.role === 'user') && <p className="text-sm text-muted-foreground">Todos os jogadores já são administradores.</p>}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Regras Financeiras</CardTitle>
+              <CardDescription>Configure as multas e mensalidade do grupo.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              <form className="grid gap-3" onFocus={() => setIsEditingSettings(true)} onBlur={() => setIsEditingSettings(false)} onSubmit={event => {
+                event.preventDefault();
+                updateSettings.mutate({
+                  appName: settingsForm.appName,
+                  appDescription: settingsForm.appDescription,
+                  primaryColor: settingsForm.primaryColor,
+                  secondaryColor: settingsForm.secondaryColor,
+                  logoUrl: settingsForm.logoUrl,
+                  openingBalanceCents: centsFromBRL(settingsForm.openingBalance),
+                  matchHour: Number(settingsForm.matchHour),
+                  matchMinute: Number(settingsForm.matchMinute),
+                  confirmationHour: Number(settingsForm.confirmationHour),
+                  confirmationMinute: Number(settingsForm.confirmationMinute),
+                  arrivalMinutesBefore: Number(settingsForm.arrivalMinutesBefore),
+                  recurringDays: settingsForm.recurringDays,
+                  regulationText: settingsForm.regulationText,
+                  monthlyFeeCents: centsFromBRL(settingsForm.monthlyFee),
+                  yellowCardFineCents: centsFromBRL(settingsForm.yellowCardFine),
+                  redCardFineCents: centsFromBRL(settingsForm.redCardFine),
+                  noShowFineCents: centsFromBRL(settingsForm.noShowFine),
+                  enableMonthlyFee: settingsForm.enableMonthlyFee,
+                  enableYellowCardFine: settingsForm.enableYellowCardFine,
+                  enableRedCardFine: settingsForm.enableRedCardFine,
+                  enableNoShowFine: settingsForm.enableNoShowFine,
+                });
+              }}>
+                <Field label="Mensalidade (R$)">
+                  <Input type="text" value={settingsForm.monthlyFee} onChange={e => setSettingsForm({ ...settingsForm, monthlyFee: e.target.value })} placeholder="0,00" />
+                </Field>
+                <Field label="Multa por cartão amarelo (R$)">
+                  <Input type="text" value={settingsForm.yellowCardFine} onChange={e => setSettingsForm({ ...settingsForm, yellowCardFine: e.target.value })} placeholder="10,00" />
+                </Field>
+                <Field label="Multa por cartão vermelho (R$)">
+                  <Input type="text" value={settingsForm.redCardFine} onChange={e => setSettingsForm({ ...settingsForm, redCardFine: e.target.value })} placeholder="50,00" />
+                </Field>
+                <Field label="Multa por falta sem aviso (R$)">
+                  <Input type="text" value={settingsForm.noShowFine} onChange={e => setSettingsForm({ ...settingsForm, noShowFine: e.target.value })} placeholder="5,00" />
+                </Field>
+                <Button type="submit">Salvar regras financeiras</Button>
+              </form>
             </CardContent>
           </Card>
           {isOwner && <Card className="lg:col-span-2">

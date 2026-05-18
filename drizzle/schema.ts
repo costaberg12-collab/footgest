@@ -42,6 +42,14 @@ export const appSettings = mysqlTable("appSettings", {
   arrivalMinutesBefore: int("arrivalMinutesBefore").default(15).notNull(),
   regulationText: text("regulationText"),
   recurringDays: varchar("recurringDays", { length: 255 }).default("5").notNull(),
+  monthlyFeeCents: int("monthlyFeeCents").default(0).notNull(),
+  yellowCardFineCents: int("yellowCardFineCents").default(1000).notNull(),
+  redCardFineCents: int("redCardFineCents").default(5000).notNull(),
+  noShowFineCents: int("noShowFineCents").default(500).notNull(),
+  enableMonthlyFee: boolean("enableMonthlyFee").default(false).notNull(),
+  enableYellowCardFine: boolean("enableYellowCardFine").default(true).notNull(),
+  enableRedCardFine: boolean("enableRedCardFine").default(true).notNull(),
+  enableNoShowFine: boolean("enableNoShowFine").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -213,5 +221,29 @@ export const playerInvites = mysqlTable("playerInvites", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
+export const playerDebts = mysqlTable("playerDebts", {
+  id: int("id").autoincrement().primaryKey(),
+  playerId: int("playerId").notNull().references(() => players.id),
+  amountCents: int("amountCents").default(0).notNull(),
+  reason: varchar("reason", { length: 255 }).notNull(),
+  type: mysqlEnum("type", ["monthly_fee", "yellow_card", "red_card", "no_show", "other"]).notNull(),
+  isPaid: boolean("isPaid").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  paidAt: timestamp("paidAt"),
+});
+
+export const monthlyFees = mysqlTable("monthlyFees", {
+  id: int("id").autoincrement().primaryKey(),
+  playerId: int("playerId").notNull().references(() => players.id),
+  month: int("month").notNull(),
+  year: int("year").notNull(),
+  amountCents: int("amountCents").notNull(),
+  isPaid: boolean("isPaid").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  paidAt: timestamp("paidAt"),
+});
+
 export type RegulationAcceptance = typeof regulationAcceptances.$inferSelect;
 export type PlayerInvite = typeof playerInvites.$inferSelect;
+export type PlayerDebt = typeof playerDebts.$inferSelect;
+export type MonthlyFee = typeof monthlyFees.$inferSelect;

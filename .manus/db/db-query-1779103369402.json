@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `appSettings` ADD `monthlyFeeCents` int DEFAULT 0 NOT NULL;\nALTER TABLE `appSettings` ADD `yellowCardFineCents` int DEFAULT 1000 NOT NULL;\nALTER TABLE `appSettings` ADD `redCardFineCents` int DEFAULT 5000 NOT NULL;\nALTER TABLE `appSettings` ADD `noShowFineCents` int DEFAULT 500 NOT NULL;\nALTER TABLE `appSettings` ADD `enableMonthlyFee` boolean DEFAULT false NOT NULL;\nALTER TABLE `appSettings` ADD `enableYellowCardFine` boolean DEFAULT true NOT NULL;\nALTER TABLE `appSettings` ADD `enableRedCardFine` boolean DEFAULT true NOT NULL;\nALTER TABLE `appSettings` ADD `enableNoShowFine` boolean DEFAULT true NOT NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2GFHmixSSd3JKEW.8512cbb676ca --database b5ezpFoDDKcYftXFGj7PDa --execute ALTER TABLE `appSettings` ADD `monthlyFeeCents` int DEFAULT 0 NOT NULL;\nALTER TABLE `appSettings` ADD `yellowCardFineCents` int DEFAULT 1000 NOT NULL;\nALTER TABLE `appSettings` ADD `redCardFineCents` int DEFAULT 5000 NOT NULL;\nALTER TABLE `appSettings` ADD `noShowFineCents` int DEFAULT 500 NOT NULL;\nALTER TABLE `appSettings` ADD `enableMonthlyFee` boolean DEFAULT false NOT NULL;\nALTER TABLE `appSettings` ADD `enableYellowCardFine` boolean DEFAULT true NOT NULL;\nALTER TABLE `appSettings` ADD `enableRedCardFine` boolean DEFAULT true NOT NULL;\nALTER TABLE `appSettings` ADD `enableNoShowFine` boolean DEFAULT true NOT NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 2808
+}
