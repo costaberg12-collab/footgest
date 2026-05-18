@@ -958,6 +958,20 @@ export default function Home() {
         </TabsContent>}
 
         <TabsContent value="stats" className="grid gap-4 md:grid-cols-3">
+          {!isAdmin && myPlayer && playerStats.data && (
+            <Card className="md:col-span-3 border-emerald-200 bg-emerald-50">
+              <CardHeader>
+                <CardTitle>Minhas Estatísticas</CardTitle>
+                <CardDescription>Seu desempenho no grupo</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-4">
+                <SummaryCard icon={Users} label="Presenças" value={playerStats.data.matchesAttended.toString()} detail="partidas confirmadas" />
+                <SummaryCard icon={CalendarClock} label="Gols" value={playerStats.data.totalGoals.toString()} detail={`média ${playerStats.data.goalsPerMatch} por jogo`} />
+                <SummaryCard icon={Users} label="Presença" value={`${((playerStats.data.matchesAttended / Math.max(playerStats.data.matchesAttended, 1)) * 100).toFixed(0)}%`} detail={`${playerStats.data.matchesAttended} respostas`} />
+                <SummaryCard icon={CalendarClock} label="Desempenho" value={playerStats.data.goalsPerMatch.toFixed(2)} detail="gols por partida" />
+              </CardContent>
+            </Card>
+          )}
           <Ranking title="Artilheiros" rows={stats.data?.scorers.map(item => ({ name: item.name, value: item.goals })) ?? []} suffix="gols" />
           <Ranking title="Cartões" rows={stats.data?.cards.map(item => ({ name: item.name, value: item.yellowCards + item.redCards })) ?? []} suffix="cartões" />
           <Ranking title="Presença" rows={stats.data?.presence.map(item => ({ name: item.name, value: item.confirmedPresence })) ?? []} suffix="presenças" />
