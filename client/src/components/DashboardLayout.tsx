@@ -51,6 +51,10 @@ export default function DashboardLayout({
   const { data: regulationStatus } = trpc.futgestao.hasAcceptedRegulation.useQuery(undefined, {
     enabled: !!user && location !== '/regulamento',
   });
+  const { data: playerData } = trpc.futgestao.getPlayerByEmail.useQuery(
+    { email: user?.email || "" },
+    { enabled: !!user && !!user.email }
+  );
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
@@ -65,12 +69,6 @@ export default function DashboardLayout({
   if (loading) {
     return <DashboardLayoutSkeleton />
   }
-
-  // Query para verificar se o email está cadastrado
-  const { data: playerData } = trpc.futgestao.getPlayerByEmail.useQuery(
-    { email: user?.email || "" },
-    { enabled: !!user && !!user.email }
-  );
 
   if (!user) {
     return (

@@ -96,6 +96,9 @@ export default function Home() {
   const listPlayersForPromotion = trpc.futgestao.listPlayersForAdminPromotion.useQuery();
   const promoteToAdmin = trpc.futgestao.promoteToAdmin.useMutation({ onSuccess: () => { refresh("Jogador promovido a administrador."); listPlayersForPromotion.refetch(); } });
   const demoteFromAdmin = trpc.futgestao.demoteFromAdmin.useMutation({ onSuccess: () => { refresh("Permissões de administrador removidas."); listPlayersForPromotion.refetch(); } });
+  const invitePlayer = trpc.futgestao.invitePlayer.useMutation({ onSuccess: () => { refresh("Convite enviado."); pendingInvites.refetch(); } });
+  const pendingInvites = trpc.futgestao.getPendingInvites.useQuery();
+  const playerStats = trpc.futgestao.getPlayerStats.useQuery();
 
   const [playerForm, setPlayerForm] = useState<FormState>(initialPlayerForm);
   const [guestForm, setGuestForm] = useState({ hostPlayerId: "0", name: "", amount: "10" });
@@ -849,6 +852,64 @@ export default function Home() {
                 <textarea value={settingsForm.regulationText} onChange={e => setSettingsForm({ ...settingsForm, regulationText: e.target.value })} placeholder="Digite o regulamento aqui..." className="min-h-48 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                 <Button type="submit">Salvar regulamento</Button>
               </form>
+            </CardContent>
+          </Card>
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Convidar Jogadores</CardTitle>
+              <CardDescription>Envie convites por email para novos jogadores.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              <form className="grid gap-3" onSubmit={event => {
+                event.preventDefault();
+                const formData = new FormData(event.currentTarget);
+                const email = formData.get('inviteEmail') as string;
+                const name = formData.get('inviteName') as string;
+                const phone = formData.get('invitePhone') as string;
+                const type = formData.get('inviteType') as PlayerType;
+                if (email && name) {
+                  invitePlayer.mutate({ email, name, phone, type, monthlyFeeCents: 8000, isMonthlyMember: true, isRefereeAuthorized: false });
+                  event.currentTarget.reset();
+                }
+              }}>
+                <Field label="Nome do jogador">
+                  <Input type="text" name="inviteName" placeholder="João Silva" required />
+                </Field>
+                <Field label="Email do jogador">
+                  <Input type="email" name="inviteEmail" placeholder="jogador@email.com" required />
+                </Field>
+                <Field label="Telefone">
+                  <Input type="tel" name="invitePhone" placeholder="(11) 99999-9999" />
+                </Field>
+                <Field label="Tipo de jogador">
+                  <Select name="inviteType" defaultValue="line">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="line">Linha</SelectItem>
+                      <SelectItem value="goalkeeper">Goleiro</SelectItem>
+                      <SelectItem value="both">Linha e goleiro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Button type="submit">Enviar convite</Button>
+              </form>
+              {pendingInvites.data && pendingInvites.data.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="font-semibold mb-3">Convites pendentes</h4>
+                  <div className="grid gap-2">
+                    {pendingInvites.data.map(invite => (
+                      <div key={invite.id} className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3">
+                        <div>
+                          <p className="font-medium text-amber-900">{invite.email}</p>
+                          <p className="text-xs text-amber-700">Enviado em {dateTime(invite.createdAt)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
           <Card className="lg:col-span-2">
