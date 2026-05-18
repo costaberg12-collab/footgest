@@ -123,4 +123,4 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - [x] Validação de email com feedback claro quando jogador não está cadastrado
 - [x] Dashboard de estatísticas pessoais do jogador
 - [x] Cálculo de média de gols por partida (gols / partidas que compareceu)
-- [ ] Integração com WhatsApp para enviar convites no grupo (planejado para próxima fase)
+- [ ] Integração com WhatsApp para enviar convites no grupo (planejado para futuro)
