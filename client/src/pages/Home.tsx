@@ -96,9 +96,6 @@ export default function Home() {
   const listPlayersForPromotion = trpc.futgestao.listPlayersForAdminPromotion.useQuery();
   const promoteToAdmin = trpc.futgestao.promoteToAdmin.useMutation({ onSuccess: () => { refresh("Jogador promovido a administrador."); listPlayersForPromotion.refetch(); } });
   const demoteFromAdmin = trpc.futgestao.demoteFromAdmin.useMutation({ onSuccess: () => { refresh("Permissões de administrador removidas."); listPlayersForPromotion.refetch(); } });
-  const invitePlayer = trpc.futgestao.invitePlayer.useMutation({ onSuccess: () => { refresh("Convite enviado."); pendingInvites.refetch(); } });
-  const pendingInvites = trpc.futgestao.getPendingInvites.useQuery();
-  const playerStats = trpc.futgestao.getPlayerStats.useQuery();
 
   const [playerForm, setPlayerForm] = useState<FormState>(initialPlayerForm);
   const [guestForm, setGuestForm] = useState({ hostPlayerId: "0", name: "", amount: "10" });
@@ -856,64 +853,6 @@ export default function Home() {
           </Card>
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle>Convidar Jogadores</CardTitle>
-              <CardDescription>Envie convites por email para novos jogadores.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-3">
-              <form className="grid gap-3" onSubmit={event => {
-                event.preventDefault();
-                const formData = new FormData(event.currentTarget);
-                const email = formData.get('inviteEmail') as string;
-                const name = formData.get('inviteName') as string;
-                const phone = formData.get('invitePhone') as string;
-                const type = formData.get('inviteType') as PlayerType;
-                if (email && name) {
-                  invitePlayer.mutate({ email, name, phone, type, monthlyFeeCents: 8000, isMonthlyMember: true, isRefereeAuthorized: false });
-                  event.currentTarget.reset();
-                }
-              }}>
-                <Field label="Nome do jogador">
-                  <Input type="text" name="inviteName" placeholder="João Silva" required />
-                </Field>
-                <Field label="Email do jogador">
-                  <Input type="email" name="inviteEmail" placeholder="jogador@email.com" required />
-                </Field>
-                <Field label="Telefone">
-                  <Input type="tel" name="invitePhone" placeholder="(11) 99999-9999" />
-                </Field>
-                <Field label="Tipo de jogador">
-                  <Select name="inviteType" defaultValue="line">
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="line">Linha</SelectItem>
-                      <SelectItem value="goalkeeper">Goleiro</SelectItem>
-                      <SelectItem value="both">Linha e goleiro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Field>
-                <Button type="submit">Enviar convite</Button>
-              </form>
-              {pendingInvites.data && pendingInvites.data.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="font-semibold mb-3">Convites pendentes</h4>
-                  <div className="grid gap-2">
-                    {pendingInvites.data.map(invite => (
-                      <div key={invite.id} className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3">
-                        <div>
-                          <p className="font-medium text-amber-900">{invite.email}</p>
-                          <p className="text-xs text-amber-700">Enviado em {dateTime(invite.createdAt)}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          <Card className="lg:col-span-2">
-            <CardHeader>
               <CardTitle>Gerenciamento de Admins</CardTitle>
               <CardDescription>Promova ou remova permissões de administrador para os jogadores.</CardDescription>
             </CardHeader>
@@ -958,20 +897,6 @@ export default function Home() {
         </TabsContent>}
 
         <TabsContent value="stats" className="grid gap-4 md:grid-cols-3">
-          {!isAdmin && myPlayer && playerStats.data && (
-            <Card className="md:col-span-3 border-emerald-200 bg-emerald-50">
-              <CardHeader>
-                <CardTitle>Minhas Estatísticas</CardTitle>
-                <CardDescription>Seu desempenho no grupo</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-4">
-                <SummaryCard icon={Users} label="Presenças" value={playerStats.data.matchesAttended.toString()} detail="partidas confirmadas" />
-                <SummaryCard icon={CalendarClock} label="Gols" value={playerStats.data.totalGoals.toString()} detail={`média ${playerStats.data.goalsPerMatch} por jogo`} />
-                <SummaryCard icon={Users} label="Presença" value={`${((playerStats.data.matchesAttended / Math.max(playerStats.data.matchesAttended, 1)) * 100).toFixed(0)}%`} detail={`${playerStats.data.matchesAttended} respostas`} />
-                <SummaryCard icon={CalendarClock} label="Desempenho" value={playerStats.data.goalsPerMatch.toFixed(2)} detail="gols por partida" />
-              </CardContent>
-            </Card>
-          )}
           <Ranking title="Artilheiros" rows={stats.data?.scorers.map(item => ({ name: item.name, value: item.goals })) ?? []} suffix="gols" />
           <Ranking title="Cartões" rows={stats.data?.cards.map(item => ({ name: item.name, value: item.yellowCards + item.redCards })) ?? []} suffix="cartões" />
           <Ranking title="Presença" rows={stats.data?.presence.map(item => ({ name: item.name, value: item.confirmedPresence })) ?? []} suffix="presenças" />

@@ -1,21 +1,24 @@
 {
-  "customDomain": "wbgsolutions.com.br",
+  "customDomain": "footgest.wbg-app.com.br",
+  "parentDomain": "wbg-app.com.br",
+  "subdomain": "footgest",
   "projectId": "b5ezpFoDDKcYftXFGj7PDa",
-  "status": "active",
+  "status": "pending_dns_propagation",
   "dnsRecords": {
     "A": {
-      "name": "@",
+      "name": "footgest",
       "type": "A",
       "value": "104.21.16.89",
       "ttl": 3600
     },
     "CNAME": {
-      "name": "www",
+      "name": "www.footgest",
       "type": "CNAME",
-      "value": "wbgsolutions.com.br",
+      "value": "footgest.wbg-app.com.br",
       "ttl": 3600
     }
   },
   "createdAt": "2026-05-15T15:09:00Z",
-  "updatedAt": "2026-05-16T10:44:00Z"
+  "updatedAt": "2026-05-18T13:30:00Z",
+  "notes": "Migração para subdomínio footgest.wbg-app.com.br. DNS configurado em registrador de wbg-app.com.br. Aguardando propagação."
 }

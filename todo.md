@@ -123,4 +123,34 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - [x] Validação de email com feedback claro quando jogador não está cadastrado
 - [x] Dashboard de estatísticas pessoais do jogador
 - [x] Cálculo de média de gols por partida (gols / partidas que compareceu)
-- [ ] Integração com WhatsApp para enviar convites no grupo (planejado para futuro)
+- [ ] Integração com WhatsApp para enviar convites no grupo
+
+
+## Informações Críticas do Projeto (NÃO ESQUECER)
+
+- **Admin Email:** costaberg12@gmail.com
+- **Domínio anterior 1:** wbgsolutions.com.br (não propagou - DESCONTINUADO)
+- **Domínio anterior 2:** wbg-engtech.com.br (trocado por subdomínio - DESCONTINUADO)
+- **Novo domínio:** footgest.wbg-app.com.br (ATIVO - EM PROGRESSO)
+- **Domínio principal:** wbg-app.com.br (registrado e ativo)
+- **Configuração DNS do novo subdomínio:**
+  - Registro A: `footgest` → 104.21.16.89 ✅
+  - Registro CNAME: `www.footgest` → footgest.wbg-app.com.br ✅
+  - Registrador: wbg-app.com.br
+  - Status: Configurado, aguardando propagação
+- **IP do servidor:** 104.21.16.89 (fornecido por mim)
+- **App Name:** FutGestão / Footbreia app
+- **User NÃO tem acesso ao Management UI do Manus** - EU preciso fazer todas as configurações
+- **Não implementar integração com WhatsApp por enquanto** (planejado para futuro)
+- **Gerenciar a atividade de domínio até o fim** - não deixar incompleto
+
+
+## Configuração do Novo Subdomínio footgest.wbg-app.com.br (EM PROGRESSO)
+
+- [x] Atualizar arquivo domain-config.json com novo subdomínio (footgest.wbg-app.com.br) ✅
+- [x] Configurar registros DNS no registrador de wbg-app.com.br ✅
+- [ ] Verificar propagação DNS (aguardando)
+- [ ] Vincular domínio customizado no painel do Manus
+- [ ] Testar acesso pelo novo subdomínio
+- [ ] Atualizar documentação do projeto
+- [ ] Confirmar que tudo está funcionando

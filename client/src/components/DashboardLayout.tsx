@@ -97,9 +97,7 @@ export default function DashboardLayout({
   }
 
   // Validar se o email do usuário está cadastrado como jogador
-  // Permitir que o admin (proprietário) acesse mesmo sem estar cadastrado
-  const isAdmin = user?.role === 'admin'; // Verificar se é admin
-  if (user && user.email && playerData && !playerData.found && !isAdmin) {
+  if (user && user.email && playerData && !playerData.found) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
