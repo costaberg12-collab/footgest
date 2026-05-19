@@ -75,6 +75,7 @@ export default function Home() {
   const stats = trpc.futgestao.stats.useQuery();
   const appSettings = trpc.futgestao.getAppSettings.useQuery();
   const isOwner = appSettings.data && user && appSettings.data.ownerId === user.id;
+  const canAccessControlPanel = isOwner || (user && user.role === 'admin');
 
   const createPlayer = trpc.futgestao.createPlayer.useMutation({ onSuccess: () => refresh("Jogador cadastrado.") });
   const createMyPlayer = trpc.futgestao.createMyPlayer.useMutation({ onSuccess: () => refresh("Seu cadastro foi salvo.") });
@@ -264,14 +265,14 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, [data?.match.clockRunning]);
 
-  const isAdmin = user?.role === "admin";
+  const isAdminUser = user?.role === "admin";
   const arrivalQrUrl = data?.match.arrivalQrToken ? `${window.location.origin}/chegada?token=${data.match.arrivalQrToken}` : "";
   const brandStyle = data?.settings ? ({ "--brand-primary": data.settings.primaryColor, "--brand-secondary": data.settings.secondaryColor } as React.CSSProperties) : undefined;
   const confirmedCount = data?.players.filter(player => player.attendance?.status === "confirmed").length ?? 0;
   const pendingCount = data?.players.filter(player => (player.attendance?.status ?? "pending") === "pending").length ?? 0;
   const declinedCount = data?.players.filter(player => player.attendance?.status === "declined").length ?? 0;
   const myPlayer = data?.players.find(player => player.userId === user?.id);
-  const presencePlayers = data ? (isAdmin ? data.players : myPlayer ? [myPlayer] : []) : [];
+  const presencePlayers = data ? (isAdminUser ? data.players : myPlayer ? [myPlayer] : []) : [];
 
   const availableEventPlayers = useMemo(() => {
     if (!data) return [];
@@ -319,7 +320,7 @@ export default function Home() {
             </CardHeader>
             <CardContent className="grid gap-3">
               <StatusRow label="Confirmados" value={confirmedCount} tone="text-emerald-700" />
-              {isAdmin && <StatusRow label="Pendentes" value={pendingCount} tone="text-amber-700" />}
+               {isAdminUser && <StatusRow label="Pendentes" value={pendingCount} tone="text-amber-700" />}
               <StatusRow label="Não vão" value={declinedCount} tone="text-rose-700" />
               <Separator />
               <div className="flex items-center justify-between">
@@ -347,28 +348,28 @@ export default function Home() {
           <TabsTrigger value="times">Times</TabsTrigger>
           <TabsTrigger value="jogo">Jogo</TabsTrigger>
           <TabsTrigger value="stats">Estatísticas</TabsTrigger>
-          {isAdmin && <TabsTrigger value="config">Configurações</TabsTrigger>}
+           {isAdminUser && <TabsTrigger value="config">Configurações</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="presenca">
           <Card>
             <CardHeader>
               <CardTitle>Confirmação de presença</CardTitle>
-              <CardDescription>{isAdmin ? "Acompanhe a resposta de todos os jogadores e registre chegadas presenciais." : "Escolha apenas uma das duas opções: Presença ou Ausência. Se você não responder, o sistema mantém a situação sem confirmação."}</CardDescription>
+               <CardDescription>{isAdminUser ? "Acompanhe a resposta de todos os jogadores e registre chegadas presenciais." : "Escolha apenas uma das duas opções: Presença ou Ausência. Se você não responder, o sistema mantém a situação sem confirmação."}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3">
-              {!isAdmin && !myPlayer && (
+               {!isAdminUser && !myPlayer && (
                 <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                   Para confirmar presença, primeiro crie seu cadastro na aba Jogadores. Depois disso, esta tela mostrará somente o seu controle de Presença ou Ausência.
                 </div>
               )}
-              {!isAdmin && myPlayer && (
+               {!isAdminUser && myPlayer && (
                 <div className="grid gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950">
                   <div className="flex items-start gap-3"><QrCode className="mt-0.5 h-5 w-5" /><div><p className="font-semibold">Chegada real pelo QR Code do campo</p><p>Confirme presença antes. Quando chegar, escaneie o QR Code exibido pelo administrador ou cole o código abaixo. Só a chegada validada entra na ordem dos times.</p></div></div>
                   <div className="flex flex-col gap-2 sm:flex-row"><Input value={qrToken} onChange={e => setQrToken(e.target.value)} placeholder="Código de chegada" /><Button onClick={() => confirmArrivalByQr.mutate({ token: qrToken })} disabled={!qrToken.trim()}>Validar chegada</Button></div>
                 </div>
               )}
-              {isAdmin && (
+               {isAdminUser && (
                 <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_auto] md:items-center">
                   <div><p className="font-semibold">QR Code de chegada no campo</p><p className="text-sm text-muted-foreground">Gere e exiba este código no campo. O jogador só entra na ordem real de chegada após validar o código ou ser marcado pelo administrador.</p></div>
                   <div className="grid justify-items-center gap-2">
@@ -389,16 +390,16 @@ export default function Home() {
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-semibold">{player.name}</h3>
                         <Badge variant="outline">{typeLabel[player.type]}</Badge>
-                        {isAdmin ? <Badge className={presenceTone[status]}>{presenceLabel[status]}</Badge> : playerStatusLabel ? <Badge className={presenceTone[status]}>{playerStatusLabel}</Badge> : null}
+                         {isAdminUser ? <Badge className={presenceTone[status]}>{presenceLabel[status]}</Badge> : playerStatusLabel ? <Badge className={presenceTone[status]}>{playerStatusLabel}</Badge> : null}
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {isAdmin ? `Confirmado em ${dateTime(player.attendance?.confirmedAt)} · Ordem ${player.attendance?.arrivalOrder ?? "-"} · Chegada presencial ${dateTime(player.attendance?.arrivedAt)}` : `Sua chegada real: ${player.attendance?.arrivedAt ? `${dateTime(player.attendance.arrivedAt)} · ordem ${player.attendance.arrivalOrder ?? "-"}` : "ainda não validada por QR Code ou administrador"}`}
+                         {isAdminUser ? `Confirmado em ${dateTime(player.attendance?.confirmedAt)} · Ordem ${player.attendance?.arrivalOrder ?? "-"} · Chegada presencial ${dateTime(player.attendance?.arrivedAt)}` : `Sua chegada real: ${player.attendance?.arrivedAt ? `${dateTime(player.attendance.arrivedAt)} · ordem ${player.attendance.arrivalOrder ?? "-"}` : "ainda não validada por QR Code ou administrador"}`}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => setAttendance.mutate({ playerId: player.id, status: "confirmed" })}>Presença</Button>
                       <Button size="sm" className="border border-rose-200 bg-rose-600 text-white hover:bg-rose-700" onClick={() => setAttendance.mutate({ playerId: player.id, status: "declined" })}>Ausência</Button>
-                      {isAdmin && <Button size="sm" variant="ghost" onClick={() => markArrived.mutate({ playerId: player.id })}>Chegou</Button>}
+                       {isAdminUser && <Button size="sm" variant="ghost" onClick={() => markArrived.mutate({ playerId: player.id })}>Chegou</Button>}
                     </div>
                   </div>
                 );
@@ -410,7 +411,7 @@ export default function Home() {
         <TabsContent value="jogadores" className="grid gap-4 lg:grid-cols-[.9fr_1.1fr]">
           <Card>
             <CardHeader>
-              <CardTitle>{isAdmin ? "Cadastrar jogador" : "Meu cadastro de jogador"}</CardTitle>
+               <CardTitle>{isAdminUser ? "Cadastrar jogador" : "Meu cadastro de jogador"}</CardTitle>
               <CardDescription>Classifique cada atleta como linha, goleiro ou ambos. Administradores também definem mensalistas e árbitros autorizados.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -424,7 +425,7 @@ export default function Home() {
                   isMonthlyMember: playerForm.isMonthlyMember,
                   isRefereeAuthorized: playerForm.isRefereeAuthorized,
                 };
-                if (isAdmin) createPlayer.mutate(payload);
+                 if (isAdminUser) createPlayer.mutate(payload);
                 else createMyPlayer.mutate(payload);
                 setPlayerForm(initialPlayerForm);
               }}>
@@ -502,7 +503,7 @@ export default function Home() {
               {data.guests.map(guest => (
                 <div key={guest.id} className="flex items-center justify-between rounded-xl border p-3">
                   <div><p className="font-medium">{guest.name}</p><p className="text-xs text-muted-foreground">Valor {money(guest.amountCents)}</p></div>
-                  <Button variant={guest.paid ? "secondary" : "outline"} size="sm" disabled={!isAdmin} onClick={() => setGuestPaid.mutate({ guestId: guest.id, paid: !guest.paid })}>{guest.paid ? "Pago" : "Marcar pago"}</Button>
+                   <Button variant={guest.paid ? "secondary" : "outline"} size="sm" disabled={!isAdminUser} onClick={() => setGuestPaid.mutate({ guestId: guest.id, paid: !guest.paid })}>{guest.paid ? "Pago" : "Marcar pago"}</Button>
                 </div>
               ))}
             </CardContent>
@@ -536,7 +537,7 @@ export default function Home() {
                 <Field label="Categoria"><Select value={expenseForm.category} onValueChange={value => setExpenseForm({ ...expenseForm, category: value })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="field">Campo</SelectItem><SelectItem value="materials">Materiais</SelectItem><SelectItem value="other">Outros</SelectItem></SelectContent></Select></Field>
                 <Field label="Descrição"><Input value={expenseForm.description} onChange={e => setExpenseForm({ ...expenseForm, description: e.target.value })} required /></Field>
                 <Field label="Valor"><Input value={expenseForm.amount} onChange={e => setExpenseForm({ ...expenseForm, amount: e.target.value })} required /></Field>
-                <Button type="submit" disabled={!isAdmin}>Registrar despesa</Button>
+                 <Button type="submit" disabled={!isAdminUser}>Registrar despesa</Button>
               </form>
             </CardContent>
           </Card>
@@ -556,7 +557,7 @@ export default function Home() {
             <CardContent className="grid gap-2">
               {data.payments.map(payment => {
                 const player = data.players.find(item => item.id === payment.playerId);
-                return <div key={payment.id} className="grid gap-2 rounded-xl border p-3 md:grid-cols-[1fr_auto] md:items-center"><div><p className="font-medium">{player?.name ?? "Jogador"} · {payment.referenceMonth}</p><p className="text-xs text-muted-foreground">{money(payment.amountCents)} · status {payment.status} · comprovante: {payment.proofUrl ?? "-"}</p></div>{isAdmin && <div className="flex gap-2"><Button size="sm" onClick={() => reviewPayment.mutate({ paymentId: payment.id, status: "confirmed" })}>Confirmar</Button><Button size="sm" variant="outline" onClick={() => reviewPayment.mutate({ paymentId: payment.id, status: "rejected", rejectionReason: "Rejeitado pelo administrador" })}>Rejeitar</Button></div>}</div>;
+                 return <div key={payment.id} className="grid gap-2 rounded-xl border p-3 md:grid-cols-[1fr_auto] md:items-center"><div><p className="font-medium">{player?.name ?? "Jogador"} · {payment.referenceMonth}</p><p className="text-xs text-muted-foreground">{money(payment.amountCents)} · status {payment.status} · comprovante: {payment.proofUrl ?? "-"}</p></div>{isAdminUser && <div className="flex gap-2"><Button size="sm" onClick={() => reviewPayment.mutate({ paymentId: payment.id, status: "confirmed" })}>Confirmar</Button><Button size="sm" variant="outline" onClick={() => reviewPayment.mutate({ paymentId: payment.id, status: "rejected", rejectionReason: "Rejeitado pelo administrador" })}>Rejeitar</Button></div>}</div>;
               })}
             </CardContent>
           </Card>
@@ -566,8 +567,8 @@ export default function Home() {
           <Card>
             <CardHeader><CardTitle>Organização automática</CardTitle><CardDescription>Primeiros com chegada validada por QR Code ou administrador jogam primeiro. O algoritmo prioriza goleiros e completa times com 5 linha + 1 goleiro ou 6 sem goleiro.</CardDescription></CardHeader>
             <CardContent className="grid gap-3">
-              <Button disabled={!isAdmin} onClick={() => generateTeams.mutate()}>Gerar times</Button>
-              <Button disabled={!isAdmin || data.teams.length === 0} variant="secondary" onClick={() => assignReferees.mutate()}>Definir arbitragem</Button>
+               <Button disabled={!isAdminUser} onClick={() => generateTeams.mutate()}>Gerar times</Button>
+               <Button disabled={!isAdminUser || data.teams.length === 0} variant="secondary" onClick={() => assignReferees.mutate()}>Definir arbitragem</Button>
               <div className="rounded-xl bg-muted p-3 text-sm text-muted-foreground">Times A, B, C e D são criados conforme a quantidade de atletas confirmados. Jogadores fora dos times aparecem na fila de espera e podem ser usados na arbitragem.</div>
             </CardContent>
           </Card>
@@ -635,7 +636,7 @@ export default function Home() {
           </Card>
         </TabsContent>
 
-        {isAdmin && <TabsContent value="config" className="grid gap-4 lg:grid-cols-[1fr_1fr]">
+         {isAdminUser && <TabsContent value="config" className="grid gap-4 lg:grid-cols-[1fr_1fr]">
           <Card>
             <CardHeader>
               <CardTitle>Personalização do app</CardTitle>

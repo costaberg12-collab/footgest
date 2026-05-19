@@ -1,0 +1,8 @@
+{
+  "query": "DELETE FROM players WHERE name = 'Fundador' AND role = 'admin';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2GFHmixSSd3JKEW.8512cbb676ca --database b5ezpFoDDKcYftXFGj7PDa --execute DELETE FROM players WHERE name = 'Fundador' AND role = 'admin';",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1451 (23000) at line 1: Cannot delete or update a parent row: a foreign key constraint fails (`b5ezpfoddkcyftxfgj7pda`.`attendances`, CONSTRAINT `attendances_playerId_players_id_fk` FOREIGN KEY (`playerId`) REFERENCES `players` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION)"
+  ]
+}

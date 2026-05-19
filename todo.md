@@ -149,8 +149,12 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 
 - [x] Atualizar arquivo domain-config.json com novo subdomínio (footgest.wbg-app.com.br) ✅
 - [x] Configurar registros DNS no registrador de wbg-app.com.br ✅
-- [ ] Verificar propagação DNS (aguardando)
+- [x] Verificar propagação DNS (100% propagado globalmente) ✅
+- [x] Domínio resolvendo corretamente para 104.21.16.89 ✅
+- [ ] Gerar certificado SSL para footgest.wbg-app.com.br (CRÍTICO - EM PROGRESSO)
 - [ ] Vincular domínio customizado no painel do Manus
-- [ ] Testar acesso pelo novo subdomínio
+- [ ] Testar acesso pelo novo subdomínio com HTTPS
 - [ ] Atualizar documentação do projeto
 - [ ] Confirmar que tudo está funcionando
+
+**Status atual:** DNS ✅ | Resolução ✅ | SSL ⏳ (ERR_SSL_VERSION_OR_CIPHER_MISMATCH)

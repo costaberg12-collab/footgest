@@ -1,0 +1,9 @@
+{
+  "query": "DELETE FROM users WHERE id = 1740015;\nDELETE FROM players WHERE userId = 1740015;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2GFHmixSSd3JKEW.8512cbb676ca --database b5ezpFoDDKcYftXFGj7PDa --execute DELETE FROM users WHERE id = 1740015;\nDELETE FROM players WHERE userId = 1740015;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 615
+}

@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO players (userId, name, phone, type, monthlyFeeCents, isMonthlyMember, isRefereeAuthorized, role, active, createdAt, updatedAt)\nSELECT id, 'Fundador', NULL, 'line', 0, false, false, 'admin', true, NOW(), NOW()\nFROM users WHERE email = 'costaberg12@gmail.com'\nON DUPLICATE KEY UPDATE role = 'admin', updatedAt = NOW();",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2GFHmixSSd3JKEW.8512cbb676ca --database b5ezpFoDDKcYftXFGj7PDa --execute INSERT INTO players (userId, name, phone, type, monthlyFeeCents, isMonthlyMember, isRefereeAuthorized, role, active, createdAt, updatedAt)\nSELECT id, 'Fundador', NULL, 'line', 0, false, false, 'admin', true, NOW(), NOW()\nFROM users WHERE email = 'costaberg12@gmail.com'\nON DUPLICATE KEY UPDATE role = 'admin', updatedAt = NOW();",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 591
+}

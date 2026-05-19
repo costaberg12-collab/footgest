@@ -96,8 +96,8 @@ export default function DashboardLayout({
     );
   }
 
-  // Validar se o email do usuário está cadastrado como jogador
-  if (user && user.email && playerData && !playerData.found) {
+  // Validar se o email do usuário está cadastrado como jogador (apenas para não-admins)
+  if (user && user.email && playerData && !playerData.found && user.role !== 'admin') {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
@@ -267,6 +267,17 @@ function DashboardLayoutContent({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                {user?.role === 'admin' && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => window.open("https://3000-i3i1vwsrzqspgeswm591x-839c036e.us1.manus.computer", "_blank")}
+                      className="cursor-pointer"
+                    >
+                      <span>🔧 Painel de Controle</span>
+                    </DropdownMenuItem>
+                    <div className="my-1 h-px bg-border" />
+                  </>
+                )}
                 <DropdownMenuItem
                   onClick={logout}
                   className="cursor-pointer text-destructive focus:text-destructive"
