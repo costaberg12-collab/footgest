@@ -97,6 +97,8 @@ export default function Home() {
   const listPlayersForPromotion = trpc.futgestao.listPlayersForAdminPromotion.useQuery();
   const promoteToAdmin = trpc.futgestao.promoteToAdmin.useMutation({ onSuccess: () => { refresh("Jogador promovido a administrador."); listPlayersForPromotion.refetch(); } });
   const demoteFromAdmin = trpc.futgestao.demoteFromAdmin.useMutation({ onSuccess: () => { refresh("Permissões de administrador removidas."); listPlayersForPromotion.refetch(); } });
+  const invitePlayer = trpc.futgestao.invitePlayer.useMutation({ onSuccess: () => { refresh("Convite enviado com sucesso!"); setInviteForm({ email: "", name: "", phone: "", type: "line", monthlyFeeCents: 0, isMonthlyMember: true, isRefereeAuthorized: false }); getPendingInvites.refetch(); } });
+  const getPendingInvites = trpc.futgestao.getPendingInvites.useQuery();
 
   const [playerForm, setPlayerForm] = useState<FormState>(initialPlayerForm);
   const [guestForm, setGuestForm] = useState({ hostPlayerId: "0", name: "", amount: "10" });
@@ -107,6 +109,7 @@ export default function Home() {
   const [qrToken, setQrToken] = useState("");
   const [suggestedColors, setSuggestedColors] = useState<{ primary: string; secondary: string } | null>(null);
   const [isEditingSettings, setIsEditingSettings] = useState(false);
+  const [inviteForm, setInviteForm] = useState({ email: "", name: "", phone: "", type: "line" as PlayerType, monthlyFeeCents: 0, isMonthlyMember: true, isRefereeAuthorized: false });
   const [settingsForm, setSettingsForm] = useState({
     appName: "FutGestão",
     appDescription: "",
@@ -850,6 +853,73 @@ export default function Home() {
                 <textarea value={settingsForm.regulationText} onChange={e => setSettingsForm({ ...settingsForm, regulationText: e.target.value })} placeholder="Digite o regulamento aqui..." className="min-h-48 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                 <Button type="submit">Salvar regulamento</Button>
               </form>
+            </CardContent>
+          </Card>
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Convidar Jogadores</CardTitle>
+              <CardDescription>Envie convites por email para novos jogadores se cadastrarem no app.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <form className="grid gap-3" onSubmit={event => {
+                event.preventDefault();
+                invitePlayer.mutate({
+                  email: inviteForm.email,
+                  name: inviteForm.name,
+                  phone: inviteForm.phone,
+                  type: inviteForm.type,
+                  monthlyFeeCents: inviteForm.monthlyFeeCents,
+                  isMonthlyMember: inviteForm.isMonthlyMember,
+                  isRefereeAuthorized: inviteForm.isRefereeAuthorized,
+                });
+              }}>
+                <Field label="Email do jogador">
+                  <Input type="email" value={inviteForm.email} onChange={e => setInviteForm({ ...inviteForm, email: e.target.value })} placeholder="jogador@email.com" required />
+                </Field>
+                <Field label="Nome do jogador">
+                  <Input value={inviteForm.name} onChange={e => setInviteForm({ ...inviteForm, name: e.target.value })} placeholder="Nome completo" required />
+                </Field>
+                <Field label="Telefone">
+                  <Input value={inviteForm.phone} onChange={e => setInviteForm({ ...inviteForm, phone: e.target.value })} placeholder="(11) 99999-9999" />
+                </Field>
+                <Field label="Tipo de jogador">
+                  <select value={inviteForm.type} onChange={e => setInviteForm({ ...inviteForm, type: e.target.value as PlayerType })} className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                    <option value="line">Linha</option>
+                    <option value="goalkeeper">Goleiro</option>
+                    <option value="both">Linha e Goleiro</option>
+                  </select>
+                </Field>
+                <Field label="Mensalidade (R$)">
+                  <Input type="number" min="0" step="0.01" value={inviteForm.monthlyFeeCents / 100} onChange={e => setInviteForm({ ...inviteForm, monthlyFeeCents: Math.round(parseFloat(e.target.value) * 100) })} />
+                </Field>
+                <div className="flex gap-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={inviteForm.isMonthlyMember} onChange={e => setInviteForm({ ...inviteForm, isMonthlyMember: e.target.checked })} />
+                    <span className="text-sm">Mensalista</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={inviteForm.isRefereeAuthorized} onChange={e => setInviteForm({ ...inviteForm, isRefereeAuthorized: e.target.checked })} />
+                    <span className="text-sm">Pode apitar</span>
+                  </label>
+                </div>
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={invitePlayer.isPending}>Enviar convite</Button>
+              </form>
+              <Separator />
+              <div>
+                <h4 className="font-semibold mb-3">Convites pendentes</h4>
+                <div className="grid gap-2">
+                  {getPendingInvites.data?.map(invite => (
+                    <div key={invite.id} className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3">
+                      <div>
+                        <p className="font-medium text-amber-900">{invite.name}</p>
+                        <p className="text-xs text-amber-700">{invite.email}</p>
+                      </div>
+                      <Badge variant="outline" className="bg-amber-100 text-amber-800">Pendente</Badge>
+                    </div>
+                  ))}
+                  {getPendingInvites.data?.length === 0 && <p className="text-sm text-muted-foreground">Nenhum convite pendente.</p>}
+                </div>
+              </div>
             </CardContent>
           </Card>
           <Card className="lg:col-span-2">

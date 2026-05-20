@@ -660,6 +660,9 @@ export const appRouter = router({
       )
       .mutation(async ({ input, ctx }) => {
         const db = await requireDb();
+        const token = crypto.randomUUID();
+        const tokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        
         await db.insert(playerInvites).values({
           email: input.email,
           name: input.name,
@@ -670,8 +673,10 @@ export const appRouter = router({
           isRefereeAuthorized: input.isRefereeAuthorized,
           invitedBy: ctx.user.id,
           status: "pending",
+          token,
+          tokenExpiresAt,
         });
-        return { success: true } as const;
+        return { success: true, token } as const;
       }),
 
     getPendingInvites: adminProcedure.query(async () => {
@@ -702,6 +707,73 @@ export const appRouter = router({
           .where(eq(players.userId, user[0].id))
           .limit(1);
         return { found: !!player[0] } as const;
+      }),
+
+    acceptInviteToken: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const db = await requireDb();
+        const invite = await db
+          .select()
+          .from(playerInvites)
+          .where(eq(playerInvites.token, input.token))
+          .limit(1);
+        
+        if (!invite[0]) {
+          return { valid: false, error: "Convite não encontrado" } as const;
+        }
+        
+        if (new Date() > invite[0].tokenExpiresAt) {
+          return { valid: false, error: "Convite expirado" } as const;
+        }
+        
+        if (invite[0].status !== "pending") {
+          return { valid: false, error: "Convite já foi aceito" } as const;
+        }
+        
+        return { valid: true, invite: invite[0] } as const;
+      }),
+
+    confirmInviteAndCreatePlayer: protectedProcedure
+      .input(z.object({ token: z.string() }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await requireDb();
+        const invite = await db
+          .select()
+          .from(playerInvites)
+          .where(eq(playerInvites.token, input.token))
+          .limit(1);
+        
+        if (!invite[0]) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Convite não encontrado" });
+        }
+        
+        if (new Date() > invite[0].tokenExpiresAt) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Convite expirado" });
+        }
+        
+        if (invite[0].status !== "pending") {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Convite já foi aceito" });
+        }
+        
+        // Atualizar status do convite
+        await db
+          .update(playerInvites)
+          .set({ status: "accepted", acceptedAt: new Date() })
+          .where(eq(playerInvites.id, invite[0].id));
+        
+        // Criar jogador para o usuário atual
+        await db.insert(players).values({
+          userId: ctx.user.id,
+          name: invite[0].name,
+          phone: invite[0].phone,
+          type: invite[0].type,
+          monthlyFeeCents: invite[0].monthlyFeeCents,
+          isMonthlyMember: invite[0].isMonthlyMember,
+          isRefereeAuthorized: invite[0].isRefereeAuthorized,
+        });
+        
+        return { success: true } as const;
       }),
 
     getPlayerStats: protectedProcedure.query(async ({ ctx }) => {

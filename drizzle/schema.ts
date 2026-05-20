@@ -208,6 +208,8 @@ export const playerInvites = mysqlTable("playerInvites", {
   isRefereeAuthorized: boolean("isRefereeAuthorized").default(false).notNull(),
   invitedBy: int("invitedBy").notNull().references(() => users.id),
   status: mysqlEnum("status", ["pending", "accepted", "declined"]).default("pending").notNull(),
+  token: varchar("token", { length: 255 }).unique().notNull(),
+  tokenExpiresAt: timestamp("tokenExpiresAt").notNull(),
   acceptedAt: timestamp("acceptedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

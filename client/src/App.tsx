@@ -7,6 +7,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import ArrivalConfirmation from "./pages/ArrivalConfirmation";
+import InviteAcceptance from "./pages/InviteAcceptance";
 import RegulationAcceptance from "./pages/RegulationAcceptance";
 
 function Router() {
@@ -18,6 +19,7 @@ function Router() {
         </DashboardLayout>
       </Route>
       <Route path="/chegada" component={ArrivalConfirmation} />
+      <Route path="/convite/:token" component={InviteAcceptance} />
       <Route path="/regulamento" component={RegulationAcceptance} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
