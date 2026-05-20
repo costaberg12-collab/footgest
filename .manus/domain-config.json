@@ -3,12 +3,13 @@
   "parentDomain": "wbg-app.com.br",
   "subdomain": "footgest",
   "projectId": "b5ezpFoDDKcYftXFGj7PDa",
-  "status": "pending_dns_propagation",
+  "status": "dns_propagated",
+  "serverIp": "34.110.191.241",
   "dnsRecords": {
     "A": {
       "name": "footgest",
       "type": "A",
-      "value": "104.21.16.89",
+      "value": "34.110.191.241",
       "ttl": 3600
     },
     "CNAME": {
@@ -19,6 +20,6 @@
     }
   },
   "createdAt": "2026-05-15T15:09:00Z",
-  "updatedAt": "2026-05-18T13:30:00Z",
-  "notes": "Migração para subdomínio footgest.wbg-app.com.br. DNS configurado em registrador de wbg-app.com.br. Aguardando propagação."
+  "updatedAt": "2026-05-20T08:10:00Z",
+  "notes": "Migração para subdomínio footgest.wbg-app.com.br. DNS 100% propagado globalmente. IP corrigido para 34.110.191.241 (servidor Manus real). Aguardando geração automática de certificado SSL."
 }

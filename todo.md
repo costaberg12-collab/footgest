@@ -134,11 +134,11 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - **Novo domínio:** footgest.wbg-app.com.br (ATIVO - EM PROGRESSO)
 - **Domínio principal:** wbg-app.com.br (registrado e ativo)
 - **Configuração DNS do novo subdomínio:**
-  - Registro A: `footgest` → 104.21.16.89 ✅
+  - Registro A: `footgest` → 34.110.191.241 ✅
   - Registro CNAME: `www.footgest` → footgest.wbg-app.com.br ✅
   - Registrador: wbg-app.com.br
   - Status: Configurado, aguardando propagação
-- **IP do servidor:** 104.21.16.89 (fornecido por mim)
+- **IP do servidor:** 34.110.191.241 (IP real do servidor Manus)
 - **App Name:** FutGestão / Footbreia app
 - **User NÃO tem acesso ao Management UI do Manus** - EU preciso fazer todas as configurações
 - **Não implementar integração com WhatsApp por enquanto** (planejado para futuro)
@@ -157,7 +157,14 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - [ ] Atualizar documentação do projeto
 - [ ] Confirmar que tudo está funcionando
 
-**Status atual:** DNS ✅ | Resolução ✅ | SSL ⏳ (Aguardando geração automática - teste em 2 horas)
+**Status atual:** DNS ⏳ (Repropagando com IP correto) | Resolução ⏳ | SSL ⏳ (Aguardando após DNS 100%)
+
+**Correção Realizada (2026-05-20 08:10):**
+- ❌ IP anterior (ERRADO): 104.21.16.89
+- ✅ IP correto (MANUS): 34.110.191.241
+- Usuário já alterou o DNS no registrador
+- Aguardando repropagação DNS (15-30 minutos)
+- Após DNS 100%: Certificado SSL será gerado automaticamente (2-4 horas)
 
 ## Testes Manuais Realizados (2026-05-20)
 
