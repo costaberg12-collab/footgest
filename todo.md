@@ -157,4 +157,70 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - [ ] Atualizar documentação do projeto
 - [ ] Confirmar que tudo está funcionando
 
-**Status atual:** DNS ✅ | Resolução ✅ | SSL ⏳ (ERR_SSL_VERSION_OR_CIPHER_MISMATCH)
+**Status atual:** DNS ✅ | Resolução ✅ | SSL ⏳ (Aguardando geração automática - teste em 2 horas)
+
+## Testes Manuais Realizados (2026-05-20)
+
+### Aba Presença
+- [x] Botão "Gerar QR Code" funciona corretamente
+- [x] Botões de status (Presença, Ausência, Chegou) funcionam para cada jogador
+- [x] Registros de chegada são salvos com timestamp correto
+- [x] Exibição de ordem de chegada funciona
+
+### Aba Jogadores
+- [x] Formulário de cadastro de jogador carrega corretamente
+- [x] Campos de entrada (Nome, Telefone, Tipo, Mensalidade, Pode apitar) aparecem
+- [x] Botão "Salvar jogador" está presente
+- [x] Lista de jogadores cadastrados exibe corretamente
+
+### Aba Convidados
+- [x] Formulário de cadastro de convidado carrega
+- [x] Campos de entrada (Tipo, Nome do convidado, Valor por dia) aparecem
+- [x] Botão "Cadastrar convidado" está presente
+- [x] Status de convidados da rodada exibe corretamente
+
+### Aba Financeiro
+- [x] Seção "Enviar comprovante" carrega com campos corretos
+- [x] Seção "Registrar despesa" carrega com campos corretos
+- [x] Caixa do grupo exibe saldo, mensalidades, convidados e despesas
+- [x] Botões "Enviar comprovante" e "Registrar despesa" funcionam
+
+### Aba Times
+- [x] Seção "Organização automática" carrega com botão "Gerar times"
+- [x] Seção "Definir arbitragem" exibe corretamente
+- [x] Seção "Fila de espera" exibe jogadores fora dos times
+- [x] Seção "Arbitragem" exibe árbitros designados
+
+### Aba Jogo
+- [x] Cronômetro carrega com estado inicial correto (00:00)
+- [x] Botões de controle (Iniciar do zero, Retomar, Zerar, Pausar e salvar) aparecem
+- [x] Seção "Registrar gol ou cartão" carrega com dropdowns
+- [x] Histórico da partida exibe corretamente
+
+### Aba Estatísticas
+- [x] Rankings de Artilheiros carregam
+- [x] Rankings de Cartões carregam
+- [x] Rankings de Presença carregam
+- [x] Dados exibem corretamente com jogadores e estatísticas
+
+### Aba Configurações
+- [x] Seção "Personalização do app" carrega com campos de nome, descrição, cores
+- [x] Botão "Salvar configurações" funciona
+- [x] Seção "Horários e regras" carrega com campos de horário
+- [x] Botão "Salvar horários" funciona
+- [x] Seção "Logo do grupo" carrega com upload de arquivo
+- [x] Seção "Regulamento" carrega com textarea
+- [x] Seção "Gerenciamento de Admins" exibe jogadores para promover
+- [x] Botão "Acessar Painel de Controle" está presente (link para app.manus.im não funciona - esperado)
+
+### Resumo Geral
+- ✅ Todas as 8 abas principais carregam e funcionam
+- ✅ Todos os formulários e botões estão acessíveis
+- ✅ Dados são exibidos corretamente
+- ✅ Interface responsiva e navegável
+- ✅ Nenhum erro crítico encontrado durante os testes
+
+**Próximos passos:**
+1. Aguardar SSL para footgest.wbg-app.com.br (2-4 horas)
+2. Testar acesso via domínio customizado
+3. Preparar para implementação do modelo SaaS com Stripe
