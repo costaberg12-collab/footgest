@@ -867,12 +867,12 @@ export default function Home() {
                 <div className="flex gap-2">
                   <Input 
                     readOnly 
-                    value={`${window.location.origin}/join/${appSettings.data?.inviteCode || 'carregando'}`} 
+                    value={`https://footgest.wbg-app.com.br/join/${appSettings.data?.inviteCode || 'carregando'}`} 
                     className="font-mono text-sm"
                   />
                   <Button 
                     onClick={() => {
-                      const link = `${window.location.origin}/join/${appSettings.data?.inviteCode}`;
+                      const link = `https://footgest.wbg-app.com.br/join/${appSettings.data?.inviteCode}`;
                       navigator.clipboard.writeText(link);
                       toast.success('Link copiado!');
                     }}
