@@ -51,6 +51,7 @@ const defaultSettings = {
   arrivalMinutesBefore: 15,
   regulationText: null as string | null,
   recurringDays: "[5]" as string,
+  inviteCode: "footbreja",
 };
 
 async function ensureAppSettings() {
@@ -520,9 +521,10 @@ export const appRouter = router({
       arrivalMinutesBefore: z.number().int().min(0).max(180),
       regulationText: z.string().max(10000).optional().nullable(),
       recurringDays: z.string().min(3).max(255),
+      inviteCode: z.string().min(1).max(32).optional(),
     })).mutation(async ({ input }) => {
       const db = await requireDb();
-      await db.insert(appSettings).values({ id: 1, ...input }).onDuplicateKeyUpdate({ set: { ...input, updatedAt: new Date() } });
+      await db.insert(appSettings).values({ id: 1, inviteCode: input.inviteCode || 'footbreja', ...input }).onDuplicateKeyUpdate({ set: { ...input, updatedAt: new Date() } });
       const currentMatch = await db.select().from(matches).where(inArray(matches.status, ["scheduled", "in_progress"])).orderBy(asc(matches.matchDate)).limit(1);
       if (currentMatch[0]) {
         // Converter de UTC para BRT, fazer as mudanças, e converter de volta
@@ -758,6 +760,20 @@ export const appRouter = router({
         }
         
         return { valid: true, invite: invite[0] } as const;
+      }),
+
+    acceptInviteByCode: publicProcedure
+      .input(z.object({ code: z.string() }))
+      .query(async ({ input }) => {
+        const db = await requireDb();
+        const settings = await db.select().from(appSettings).where(eq(appSettings.inviteCode, input.code)).limit(1);
+        
+        if (!settings[0]) {
+          return { valid: false, error: "Código de convite inválido" } as const;
+        }
+        
+        const token = `code-${input.code}`;
+        return { valid: true, invite: { token, email: "", name: "", phone: "", type: "line" as const, monthlyFeeCents: 0, isMonthlyMember: true, isRefereeAuthorized: false } } as const;
       }),
 
     confirmInviteAndCreatePlayer: protectedProcedure

@@ -8,18 +8,19 @@ import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 function InviteAcceptance() {
-  const [, params] = useRoute("/convite/:token");
+  const [, paramsToken] = useRoute("/convite/:token");
+  const [, paramsCode] = useRoute("/join/:code");
   const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const authLoading = false;
-  const token = params?.token || "";
+  const token = paramsToken?.token || paramsCode?.code || "";
   
   const [isLoading, setIsLoading] = useState(false);
   const [inviteData, setInviteData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const validateInvite = trpc.futgestao.acceptInviteToken.useQuery(
-    { token },
+  const validateInvite = trpc.futgestao.acceptInviteByCode.useQuery(
+    { code: token },
     { enabled: !!token && !authLoading }
   );
 

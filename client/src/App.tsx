@@ -20,6 +20,7 @@ function Router() {
       </Route>
       <Route path="/chegada" component={ArrivalConfirmation} />
       <Route path="/convite/:token" component={InviteAcceptance} />
+      <Route path="/join/:code" component={InviteAcceptance} />
       <Route path="/regulamento" component={RegulationAcceptance} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />

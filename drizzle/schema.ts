@@ -42,6 +42,7 @@ export const appSettings = mysqlTable("appSettings", {
   arrivalMinutesBefore: int("arrivalMinutesBefore").default(15).notNull(),
   regulationText: text("regulationText"),
   recurringDays: varchar("recurringDays", { length: 255 }).default("5").notNull(),
+  inviteCode: varchar("inviteCode", { length: 32 }).unique().notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

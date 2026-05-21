@@ -71,6 +71,13 @@
       "when": 1779281211090,
       "tag": "0009_clammy_wong",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1779370779992,
+      "tag": "0010_melted_slapstick",
+      "breakpoints": true
     }
   ]
 }
