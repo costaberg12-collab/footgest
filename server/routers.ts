@@ -20,6 +20,7 @@ import {
   users,
 } from "../drizzle/schema";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { sendEmail, generateInviteEmailHtml } from "./_core/emailService";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
@@ -662,6 +663,7 @@ export const appRouter = router({
         const db = await requireDb();
         const token = crypto.randomUUID();
         const tokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        const settings = await ensureAppSettings();
         
         await db.insert(playerInvites).values({
           email: input.email,
@@ -676,7 +678,23 @@ export const appRouter = router({
           token,
           tokenExpiresAt,
         });
-        return { success: true, token } as const;
+        
+        // Send invite email
+        const appUrl = process.env.VITE_APP_URL || "http://localhost:3000";
+        const inviteLink = `${appUrl}/convite/${token}`;
+        const emailHtml = generateInviteEmailHtml(
+          input.name,
+          inviteLink,
+          settings.appName
+        );
+        
+        const emailSent = await sendEmail({
+          to: input.email,
+          subject: `Convite para ${settings.appName}`,
+          html: emailHtml,
+        });
+        
+        return { success: true, token, emailSent } as const;
       }),
 
     getPendingInvites: adminProcedure.query(async () => {
@@ -688,6 +706,14 @@ export const appRouter = router({
         .orderBy(desc(playerInvites.createdAt));
       return invites;
     }),
+
+    deleteInvite: adminProcedure
+      .input(z.object({ inviteId: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await requireDb();
+        await db.delete(playerInvites).where(eq(playerInvites.id, input.inviteId));
+        return { success: true } as const;
+      }),
 
     getPlayerByEmail: publicProcedure
       .input(z.object({ email: z.string().email() }))

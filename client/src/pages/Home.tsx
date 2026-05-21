@@ -99,6 +99,7 @@ export default function Home() {
   const demoteFromAdmin = trpc.futgestao.demoteFromAdmin.useMutation({ onSuccess: () => { refresh("Permissões de administrador removidas."); listPlayersForPromotion.refetch(); } });
   const invitePlayer = trpc.futgestao.invitePlayer.useMutation({ onSuccess: () => { refresh("Convite enviado com sucesso!"); setInviteForm({ email: "", name: "", phone: "", type: "line", monthlyFeeCents: 0, isMonthlyMember: true, isRefereeAuthorized: false }); getPendingInvites.refetch(); } });
   const getPendingInvites = trpc.futgestao.getPendingInvites.useQuery();
+  const deleteInvite = trpc.futgestao.deleteInvite.useMutation({ onSuccess: () => { refresh("Convite removido!"); getPendingInvites.refetch(); } });
 
   const [playerForm, setPlayerForm] = useState<FormState>(initialPlayerForm);
   const [guestForm, setGuestForm] = useState({ hostPlayerId: "0", name: "", amount: "10" });
@@ -914,7 +915,18 @@ export default function Home() {
                         <p className="font-medium text-amber-900">{invite.name}</p>
                         <p className="text-xs text-amber-700">{invite.email}</p>
                       </div>
-                      <Badge variant="outline" className="bg-amber-100 text-amber-800">Pendente</Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="bg-amber-100 text-amber-800">Pendente</Badge>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => deleteInvite.mutate({ inviteId: invite.id })}
+                          disabled={deleteInvite.isPending}
+                        >
+                          ✕
+                        </Button>
+                      </div>
                     </div>
                   ))}
                   {getPendingInvites.data?.length === 0 && <p className="text-sm text-muted-foreground">Nenhum convite pendente.</p>}
