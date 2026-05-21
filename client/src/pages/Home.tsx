@@ -867,12 +867,12 @@ export default function Home() {
                 <div className="flex gap-2">
                   <Input 
                     readOnly 
-                    value={`https://footgest.wbg-app.com.br/join/${appSettings.data?.inviteCode || 'carregando'}`} 
+                    value={`https://3000-i3i1vwsrzqspgeswm591x-839c036e.us1.manus.computer/join/${appSettings.data?.inviteCode || 'carregando'}`} 
                     className="font-mono text-sm"
                   />
                   <Button 
                     onClick={() => {
-                      const link = `https://footgest.wbg-app.com.br/join/${appSettings.data?.inviteCode}`;
+                      const link = `https://3000-i3i1vwsrzqspgeswm591x-839c036e.us1.manus.computer/join/${appSettings.data?.inviteCode}`;
                       navigator.clipboard.writeText(link);
                       toast.success('Link copiado!');
                     }}
