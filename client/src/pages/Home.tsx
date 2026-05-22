@@ -459,6 +459,26 @@ export default function Home() {
               </form>
             </CardContent>
           </Card>
+          {isAdminUser && data.players.some(p => !p.isConfigured) && (
+            <Card className="border-rose-300 bg-rose-50">
+              <CardHeader>
+                <CardTitle className="text-rose-900">Jogadores Pendentes de Configuração</CardTitle>
+                <CardDescription className="text-rose-800">Revise e confirme os dados dos jogadores recém-cadastrados.</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-3">
+                {data.players.filter(p => !p.isConfigured).map(player => (
+                  <div key={player.id} className="rounded-lg border border-rose-200 bg-white p-3">
+                    <div className="mb-3">
+                      <p className="font-semibold text-rose-900">{player.name}</p>
+                      <p className="text-sm text-rose-700">{typeLabel[player.type]} · {player.isMonthlyMember ? `Mensalista ${money(player.monthlyFeeCents)}` : "Avulso"}</p>
+                      {player.phone && <p className="text-sm text-rose-700">Telefone: {player.phone}</p>}
+                    </div>
+                    <Button size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => confirmPlayerConfiguration.mutate({ playerId: player.id })}>✓ Confirmar Configuração</Button>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
           <Card>
             <CardHeader>
               <CardTitle>Elenco</CardTitle>
@@ -676,9 +696,6 @@ export default function Home() {
                   regulationText: settingsForm.regulationText,
                 });
               }}>
-                <Field label="Nome do app">
-                  <Input value={settingsForm.appName} onChange={e => setSettingsForm({ ...settingsForm, appName: e.target.value })} />
-                </Field>
                 <Field label="Nome do time/grupo">
                   <Input value={settingsForm.teamName} onChange={e => setSettingsForm({ ...settingsForm, teamName: e.target.value })} placeholder="Ex: Footbreja" />
                 </Field>

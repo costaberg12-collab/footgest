@@ -30,6 +30,7 @@ import { Button } from "./ui/button";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Painel FutGestão", path: "/" },
+  { icon: Goal, label: "Convidados", path: "/convidados" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";

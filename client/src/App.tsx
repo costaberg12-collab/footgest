@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import ArrivalConfirmation from "./pages/ArrivalConfirmation";
 import InviteAcceptance from "./pages/InviteAcceptance";
 import RegulationAcceptance from "./pages/RegulationAcceptance";
+import GuestManagement from "./pages/GuestManagement";
 
 function Router() {
   return (
@@ -16,6 +17,11 @@ function Router() {
       <Route path="/">
         <DashboardLayout>
           <Home />
+        </DashboardLayout>
+      </Route>
+      <Route path="/convidados">
+        <DashboardLayout>
+          <GuestManagement />
         </DashboardLayout>
       </Route>
       <Route path="/chegada" component={ArrivalConfirmation} />

@@ -826,6 +826,7 @@ export const appRouter = router({
           monthlyFeeCents: invite[0].monthlyFeeCents,
           isMonthlyMember: invite[0].isMonthlyMember,
           isRefereeAuthorized: invite[0].isRefereeAuthorized,
+          isConfigured: false,
         });
         
         return { success: true } as const;

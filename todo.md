@@ -258,24 +258,24 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 ## Correções Solicitadas (2026-05-21)
 
 ### 01) Separar Nome do App vs Nome da Turma
-- [ ] Adicionar campo "Nome do App" (fixo: Footgest)
-- [ ] Adicionar campo "Nome da Turma" (escolhido pelo admin: Footbreja)
-- [ ] Atualizar schema com novos campos
-- [ ] Atualizar interface de configurações
-- [ ] Testar separação de nomes
+- [x] Adicionar campo "Nome do App" (fixo: Footgest)
+- [x] Adicionar campo "Nome da Turma" (escolhido pelo admin: Footbreja)
+- [x] Atualizar schema com novos campos
+- [x] Atualizar interface de configurações
+- [x] Testar separação de nomes
 
 ### 02) Mensalidade Geral e Fluxo de Convites
-- [ ] Adicionar campo "Mensalidade Geral" no schema
-- [ ] Adicionar campo "Mensalidade Geral" na interface de configurações
-- [ ] Atualizar fluxo de convites para mostrar mensalidade geral
-- [ ] Criar página exclusiva de cadastro de convidados
-- [ ] Corrigir navegação ao editar convite (ir para página de convidados, não configurações)
-- [ ] Testar fluxo completo de convites
+- [x] Adicionar campo "Mensalidade Geral" no schema
+- [x] Adicionar campo "Mensalidade Geral" na interface de configurações
+- [x] Atualizar fluxo de convites para mostrar mensalidade geral
+- [x] Criar página exclusiva de cadastro de convidados (GuestManagement.tsx)
+- [x] Corrigir navegação ao editar convite (ir para página de convidados, não configurações)
+- [x] Testar fluxo completo de convites
 
 
 ### 03) Status Visual de Jogador Pendente de Configuração
-- [ ] Adicionar campo "isConfigured" na tabela players
-- [ ] Jogador novo cadastrado = VERMELHO (não configurado)
-- [ ] Admin configura dados e clica "Confirmar"
-- [ ] Jogador volta para cor NORMAL (configurado)
-- [ ] Testar status visual de jogadores
+- [x] Adicionar campo "isConfigured" na tabela players
+- [x] Jogador novo cadastrado = VERMELHO (não configurado)
+- [x] Admin configura dados e clica "Confirmar"
+- [x] Jogador volta para cor NORMAL (configurado)
+- [x] Testar status visual de jogadores
