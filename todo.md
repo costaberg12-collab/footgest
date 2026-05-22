@@ -172,12 +172,13 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - [x] Criar guia VERCEL_DEPLOYMENT.md ✅
 - [x] Atualizar link de convite para usar domínio temporário ✅
 - [x] Criar guia de deploy para Vercel ✅
-- [ ] Usuário criar conta no Vercel
-- [ ] Usuário conectar repositório GitHub
-- [ ] Usuário configurar variáveis de ambiente
-- [ ] Usuário fazer deploy
-- [ ] Testar acesso pelo novo subdomínio com HTTPS
-- [ ] Confirmar que tudo está funcionando
+- [x] Preparar projeto para Vercel (guias e configurações criadas)
+- [ ] Usuário criar conta no Vercel (RESPONSABILIDADE DO USUÁRIO)
+- [ ] Usuário conectar repositório GitHub (RESPONSABILIDADE DO USUÁRIO)
+- [ ] Usuário configurar variáveis de ambiente (RESPONSABILIDADE DO USUÁRIO)
+- [ ] Usuário fazer deploy (RESPONSABILIDADE DO USUÁRIO)
+- [ ] Testar acesso pelo novo subdomínio com HTTPS (RESPONSABILIDADE DO USUÁRIO)
+- [ ] Confirmar que tudo está funcionando (RESPONSABILIDADE DO USUÁRIO)
 
 **Status atual:** DNS ⏳ (Repropagando com IP correto) | Resolução ⏳ | SSL ⏳ (Aguardando após DNS 100%)
 
