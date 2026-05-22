@@ -29,7 +29,9 @@ export const users = mysqlTable("users", {
 export const appSettings = mysqlTable("appSettings", {
   id: int("id").primaryKey(),
   ownerId: int("ownerId").references(() => users.id),
-  appName: varchar("appName", { length: 80 }).default("FutGestão").notNull(),
+  appName: varchar("appName", { length: 80 }).default("Footgest").notNull(),
+  teamName: varchar("teamName", { length: 80 }).default("Footbreja").notNull(),
+  monthlyFeeCents: int("monthlyFeeCents").default(0).notNull(),
   appDescription: text("appDescription"),
   primaryColor: varchar("primaryColor", { length: 16 }).default("#16a34a").notNull(),
   secondaryColor: varchar("secondaryColor", { length: 16 }).default("#0f172a").notNull(),
@@ -43,6 +45,7 @@ export const appSettings = mysqlTable("appSettings", {
   regulationText: text("regulationText"),
   recurringDays: varchar("recurringDays", { length: 255 }).default("5").notNull(),
   inviteCode: varchar("inviteCode", { length: 32 }).unique().notNull(),
+  guestMonthlyFeeCents: int("guestMonthlyFeeCents").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -56,6 +59,7 @@ export const players = mysqlTable("players", {
   monthlyFeeCents: int("monthlyFeeCents").default(0).notNull(),
   isMonthlyMember: boolean("isMonthlyMember").default(true).notNull(),
   isRefereeAuthorized: boolean("isRefereeAuthorized").default(false).notNull(),
+  isConfigured: boolean("isConfigured").default(false).notNull(),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   active: boolean("active").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

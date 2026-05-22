@@ -170,6 +170,8 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 - [x] Criar arquivo vercel.json ✅
 - [x] Criar .vercelignore ✅
 - [x] Criar guia VERCEL_DEPLOYMENT.md ✅
+- [x] Atualizar link de convite para usar domínio temporário ✅
+- [x] Criar guia de deploy para Vercel ✅
 - [ ] Usuário criar conta no Vercel
 - [ ] Usuário conectar repositório GitHub
 - [ ] Usuário configurar variáveis de ambiente
@@ -251,3 +253,29 @@ O sistema será organizado em torno de jogadores, partidas semanais, confirmaç�
 1. Aguardar SSL para footgest.wbg-app.com.br (2-4 horas)
 2. Testar acesso via domínio customizado
 3. Preparar para implementação do modelo SaaS com Stripe
+
+
+## Correções Solicitadas (2026-05-21)
+
+### 01) Separar Nome do App vs Nome da Turma
+- [ ] Adicionar campo "Nome do App" (fixo: Footgest)
+- [ ] Adicionar campo "Nome da Turma" (escolhido pelo admin: Footbreja)
+- [ ] Atualizar schema com novos campos
+- [ ] Atualizar interface de configurações
+- [ ] Testar separação de nomes
+
+### 02) Mensalidade Geral e Fluxo de Convites
+- [ ] Adicionar campo "Mensalidade Geral" no schema
+- [ ] Adicionar campo "Mensalidade Geral" na interface de configurações
+- [ ] Atualizar fluxo de convites para mostrar mensalidade geral
+- [ ] Criar página exclusiva de cadastro de convidados
+- [ ] Corrigir navegação ao editar convite (ir para página de convidados, não configurações)
+- [ ] Testar fluxo completo de convites
+
+
+### 03) Status Visual de Jogador Pendente de Configuração
+- [ ] Adicionar campo "isConfigured" na tabela players
+- [ ] Jogador novo cadastrado = VERMELHO (não configurado)
+- [ ] Admin configura dados e clica "Confirmar"
+- [ ] Jogador volta para cor NORMAL (configurado)
+- [ ] Testar status visual de jogadores

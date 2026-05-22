@@ -1,0 +1,1 @@
+ALTER TABLE `players` ADD `isConfigured` boolean DEFAULT false NOT NULL;

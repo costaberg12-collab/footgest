@@ -38,7 +38,10 @@ async function requireDb() {
 const defaultSettings = {
   id: 1,
   ownerId: null as number | null,
-  appName: "FutGestão",
+  appName: "Footgest",
+  teamName: "Footbreja",
+  monthlyFeeCents: 0,
+  guestMonthlyFeeCents: 0,
   appDescription: "Controle a confirmação, os convidados, o caixa, os times, a arbitragem e as estatísticas da sua turma em um único painel responsivo para web e celular.",
   primaryColor: "#16a34a",
   secondaryColor: "#0f172a",
@@ -243,6 +246,14 @@ export const appRouter = router({
         const db = await requireDb();
         const { id, ...values } = input;
         await db.update(players).set(values).where(eq(players.id, id));
+        return { success: true } as const;
+      }),
+
+    confirmPlayerConfiguration: adminProcedure
+      .input(z.object({ playerId: z.number().int().positive() }))
+      .mutation(async ({ input }) => {
+        const db = await requireDb();
+        await db.update(players).set({ isConfigured: true }).where(eq(players.id, input.playerId));
         return { success: true } as const;
       }),
 
@@ -509,6 +520,8 @@ export const appRouter = router({
 
     updateSettings: adminProcedure.input(z.object({
       appName: z.string().min(2).max(80),
+      teamName: z.string().min(2).max(80).optional(),
+      monthlyFeeCents: z.number().int().min(0).optional(),
       appDescription: z.string().max(600).optional().nullable(),
       primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
       secondaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
@@ -773,7 +786,7 @@ export const appRouter = router({
         }
         
         const token = `code-${input.code}`;
-        return { valid: true, invite: { token, email: "", name: "", phone: "", type: "line" as const, monthlyFeeCents: 0, isMonthlyMember: true, isRefereeAuthorized: false } } as const;
+        return { valid: true, invite: { token, email: "", name: "", phone: "", type: "line" as const, monthlyFeeCents: settings[0].monthlyFeeCents, isMonthlyMember: true, isRefereeAuthorized: false } } as const;
       }),
 
     confirmInviteAndCreatePlayer: protectedProcedure

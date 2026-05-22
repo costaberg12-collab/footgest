@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `appSettings` MODIFY COLUMN `appName` varchar(80) NOT NULL DEFAULT 'Footgest';\nALTER TABLE `appSettings` ADD `teamName` varchar(80) DEFAULT 'Footbreja' NOT NULL;\nALTER TABLE `appSettings` ADD `monthlyFeeCents` int DEFAULT 0 NOT NULL;\nALTER TABLE `appSettings` ADD `guestMonthlyFeeCents` int DEFAULT 0 NOT NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2GFHmixSSd3JKEW.8512cbb676ca --database b5ezpFoDDKcYftXFGj7PDa --execute ALTER TABLE `appSettings` MODIFY COLUMN `appName` varchar(80) NOT NULL DEFAULT 'Footgest';\nALTER TABLE `appSettings` ADD `teamName` varchar(80) DEFAULT 'Footbreja' NOT NULL;\nALTER TABLE `appSettings` ADD `monthlyFeeCents` int DEFAULT 0 NOT NULL;\nALTER TABLE `appSettings` ADD `guestMonthlyFeeCents` int DEFAULT 0 NOT NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1490
+}

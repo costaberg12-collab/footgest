@@ -97,6 +97,7 @@ export default function Home() {
   const listPlayersForPromotion = trpc.futgestao.listPlayersForAdminPromotion.useQuery();
   const promoteToAdmin = trpc.futgestao.promoteToAdmin.useMutation({ onSuccess: () => { refresh("Jogador promovido a administrador."); listPlayersForPromotion.refetch(); } });
   const demoteFromAdmin = trpc.futgestao.demoteFromAdmin.useMutation({ onSuccess: () => { refresh("Permissões de administrador removidas."); listPlayersForPromotion.refetch(); } });
+  const confirmPlayerConfiguration = trpc.futgestao.confirmPlayerConfiguration.useMutation({ onSuccess: () => { refresh("Configuração do jogador confirmada."); overview.refetch(); } });
   const invitePlayer = trpc.futgestao.invitePlayer.useMutation({ onSuccess: () => { refresh("Convite enviado com sucesso!"); setInviteForm({ email: "", name: "", phone: "", type: "line", monthlyFeeCents: 0, isMonthlyMember: true, isRefereeAuthorized: false }); getPendingInvites.refetch(); } });
   const getPendingInvites = trpc.futgestao.getPendingInvites.useQuery();
   const deleteInvite = trpc.futgestao.deleteInvite.useMutation({ onSuccess: () => { refresh("Convite removido!"); getPendingInvites.refetch(); } });
@@ -113,6 +114,8 @@ export default function Home() {
   const [inviteForm, setInviteForm] = useState({ email: "", name: "", phone: "", type: "line" as PlayerType, monthlyFeeCents: 0, isMonthlyMember: true, isRefereeAuthorized: false });
   const [settingsForm, setSettingsForm] = useState({
     appName: "FutGestão",
+    teamName: "Footbreja",
+    monthlyFeeCents: "8000",
     appDescription: "",
     primaryColor: "#16a34a",
     secondaryColor: "#0f172a",
@@ -240,6 +243,8 @@ export default function Home() {
     if (!data?.settings) return;
     setSettingsForm({
       appName: data.settings.appName,
+      teamName: data.settings.teamName ?? "Footbreja",
+      monthlyFeeCents: String((data.settings.monthlyFeeCents ?? 0) / 100).replace(".", ","),
       appDescription: data.settings.appDescription ?? "",
       primaryColor: data.settings.primaryColor,
       secondaryColor: data.settings.secondaryColor,
@@ -461,14 +466,18 @@ export default function Home() {
             </CardHeader>
             <CardContent className="grid gap-2">
               {data.players.map(player => (
-                <div key={player.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3">
+                <div key={player.id} className={`flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3 ${
+                  !player.isConfigured ? 'border-rose-300 bg-rose-50' : ''
+                }`}>
                   <div>
                     <p className="font-medium">{player.name}</p>
                     <p className="text-xs text-muted-foreground">{typeLabel[player.type]} · {player.isMonthlyMember ? `Mensalista ${money(player.monthlyFeeCents)}` : "Avulso"}</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
+                    {!player.isConfigured && <Badge className="bg-rose-600 text-white hover:bg-rose-700">Pendente</Badge>}
                     {player.isRefereeAuthorized && <Badge variant="outline">Árbitro</Badge>}
                     {player.userId === user?.id && <Badge>Meu perfil</Badge>}
+                    {!player.isConfigured && isAdminUser && <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={() => confirmPlayerConfiguration.mutate({ playerId: player.id })}>Confirmar</Button>}
                   </div>
                 </div>
               ))}
@@ -651,6 +660,8 @@ export default function Home() {
                 event.preventDefault();
                 updateSettings.mutate({
                   appName: settingsForm.appName,
+                  teamName: settingsForm.teamName,
+                  monthlyFeeCents: centsFromBRL(settingsForm.monthlyFeeCents),
                   appDescription: settingsForm.appDescription,
                   primaryColor: settingsForm.primaryColor,
                   secondaryColor: settingsForm.secondaryColor,
@@ -667,6 +678,12 @@ export default function Home() {
               }}>
                 <Field label="Nome do app">
                   <Input value={settingsForm.appName} onChange={e => setSettingsForm({ ...settingsForm, appName: e.target.value })} />
+                </Field>
+                <Field label="Nome do time/grupo">
+                  <Input value={settingsForm.teamName} onChange={e => setSettingsForm({ ...settingsForm, teamName: e.target.value })} placeholder="Ex: Footbreja" />
+                </Field>
+                <Field label="Taxa mensal geral (R$)">
+                  <Input value={settingsForm.monthlyFeeCents} onChange={e => setSettingsForm({ ...settingsForm, monthlyFeeCents: e.target.value })} placeholder="Ex: 80,00" />
                 </Field>
                 <Field label="Descrição">
                   <Input value={settingsForm.appDescription} onChange={e => setSettingsForm({ ...settingsForm, appDescription: e.target.value })} placeholder="Descreva seu grupo" />
@@ -700,6 +717,8 @@ export default function Home() {
                 event.preventDefault();
                 updateSettings.mutate({
                   appName: settingsForm.appName,
+                  teamName: settingsForm.teamName,
+                  monthlyFeeCents: centsFromBRL(settingsForm.monthlyFeeCents),
                   appDescription: settingsForm.appDescription,
                   primaryColor: settingsForm.primaryColor,
                   secondaryColor: settingsForm.secondaryColor,
