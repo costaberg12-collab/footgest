@@ -48,8 +48,9 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  // Em producao, o dist/public esta no mesmo nivel de dist/index.js
-  const distPath = path.resolve(import.meta.dirname, "..", "..", "dist", "public");
+  // import.meta.dirname em producao eh /app/dist (apos esbuild bundle)
+  // Precisamos de /app/dist/public que eh import.meta.dirname/public
+  const distPath = path.resolve(import.meta.dirname, "public");
   
   if (!fs.existsSync(distPath)) {
     console.error(
