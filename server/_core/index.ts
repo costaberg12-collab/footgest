@@ -51,15 +51,21 @@ async function startServer() {
     serveStatic(app);
   }
 
-  const preferredPort = parseInt(process.env.PORT || "3000");
-  const port = await findAvailablePort(preferredPort);
-
-  if (port !== preferredPort) {
-    console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
+  // Em produção (Railway, etc), use a porta injetada diretamente
+  // Em desenvolvimento, encontre uma porta disponível
+  let port: number;
+  if (process.env.NODE_ENV === "production") {
+    port = parseInt(process.env.PORT || "3000");
+  } else {
+    const preferredPort = parseInt(process.env.PORT || "3000");
+    port = await findAvailablePort(preferredPort);
+    if (port !== preferredPort) {
+      console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
+    }
   }
 
-  server.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}/`);
+  server.listen(port, "0.0.0.0", () => {
+    console.log(`Server running on http://0.0.0.0:${port}/`);
   });
 }
 
