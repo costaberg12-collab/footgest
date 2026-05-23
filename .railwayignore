@@ -1,0 +1,14 @@
+.git
+.gitignore
+.env.local
+.env.*.local
+.vscode
+.idea
+*.log
+.DS_Store
+README.md
+LICENSE
+.gitattributes
+.editorconfig
+.vercelignore
+VERCEL_DEPLOYMENT.md
