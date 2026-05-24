@@ -113,7 +113,7 @@ export default function Home() {
   const [isEditingSettings, setIsEditingSettings] = useState(false);
   const [inviteForm, setInviteForm] = useState({ email: "", name: "", phone: "", type: "line" as PlayerType, monthlyFeeCents: 0, isMonthlyMember: true, isRefereeAuthorized: false });
   const [settingsForm, setSettingsForm] = useState({
-    appName: "FutGestão",
+    appName: "Footgest",
     teamName: "Footbreja",
     monthlyFeeCents: "8000",
     appDescription: "",
@@ -290,7 +290,7 @@ export default function Home() {
   }, [data]);
 
   if (overview.isLoading) {
-    return <div className="grid min-h-[60vh] place-items-center text-muted-foreground">Carregando o FutGestão...</div>;
+    return <div className="grid min-h-[60vh] place-items-center text-muted-foreground">Carregando o Footgest...</div>;
   }
 
   if (overview.error || !data) {

@@ -29,7 +29,7 @@ import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Painel FutGestão", path: "/" },
+  { icon: LayoutDashboard, label: "Painel Footgest", path: "/" },
   { icon: Goal, label: "Convidados", path: "/convidados" },
 ];
 
@@ -77,7 +77,7 @@ export default function DashboardLayout({
         <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
           <div className="flex flex-col items-center gap-6">
             <h1 className="text-2xl font-semibold tracking-tight text-center">
-              Entrar no FutGestão
+              Entrar no Footgest
             </h1>
               <p className="text-sm text-muted-foreground text-center max-w-sm">
               Entre para acessar o painel da pelada, confirmar presença, gerenciar jogadores e acompanhar o financeiro.
@@ -218,7 +218,7 @@ function DashboardLayoutContent({
                   <div className="flex items-center gap-2 min-w-0">
                     <Goal className="h-4 w-4 text-primary" />
                     <span className="font-semibold tracking-tight truncate">
-                      FutGestão
+                      Footgest
                     </span>
                   </div>
               ) : null}
@@ -308,7 +308,7 @@ function DashboardLayoutContent({
               <div className="flex items-center gap-3">
                 <div className="flex flex-col gap-1">
                   <span className="tracking-tight text-foreground">
-                    {activeMenuItem?.label ?? "FutGestão"}
+                    {activeMenuItem?.label ?? "Footgest"}
                   </span>
                 </div>
               </div>
