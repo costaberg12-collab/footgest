@@ -60,46 +60,75 @@ export function serveStatic(app: Express) {
     console.error(`import.meta.dirname: ${import.meta.dirname}`);
   }
 
-  // Inject environment variables into index.html at runtime
-  // This is done via a custom middleware that only handles index.html
-  const injectEnvVars = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    // Only intercept requests for index.html
-    const originalSend = res.send;
-    res.send = function(data: any) {
-      if (typeof data === 'string' && data.includes('</head>')) {
-        const envVars = {
-          VITE_APP_ID: process.env.VITE_APP_ID || "",
-          VITE_OAUTH_PORTAL_URL: process.env.VITE_OAUTH_PORTAL_URL || "",
-          VITE_FRONTEND_FORGE_API_URL: process.env.VITE_FRONTEND_FORGE_API_URL || "",
-          VITE_FRONTEND_FORGE_API_KEY: process.env.VITE_FRONTEND_FORGE_API_KEY || "",
-          VITE_APP_TITLE: process.env.VITE_APP_TITLE || "",
-          VITE_APP_LOGO: process.env.VITE_APP_LOGO || "",
-          VITE_ANALYTICS_ENDPOINT: process.env.VITE_ANALYTICS_ENDPOINT || "",
-          VITE_ANALYTICS_WEBSITE_ID: process.env.VITE_ANALYTICS_WEBSITE_ID || "",
-        };
-
-        const envScript = `<script>
-          window.__ENV__ = ${JSON.stringify(envVars)};
-        </script>`;
-
-        data = data.replace("</head>", `${envScript}</head>`);
+  // Serve static files (CSS, JS, images, etc.)
+  app.use(express.static(distPath, {
+    setHeaders: (res, path) => {
+      // Ensure proper MIME types
+      if (path.endsWith('.js')) {
+        res.set('Content-Type', 'application/javascript');
+      } else if (path.endsWith('.css')) {
+        res.set('Content-Type', 'text/css');
       }
-      return originalSend.call(this, data);
-    };
-    next();
-  };
+    }
+  }));
 
-  app.use(injectEnvVars);
+  // Handle HTML requests and inject environment variables
+  app.get('/', (req, res) => {
+    const indexPath = path.resolve(distPath, 'index.html');
+    try {
+      let html = fs.readFileSync(indexPath, 'utf-8');
+      
+      // Inject environment variables as a global script
+      const envVars = {
+        VITE_APP_ID: process.env.VITE_APP_ID || "",
+        VITE_OAUTH_PORTAL_URL: process.env.VITE_OAUTH_PORTAL_URL || "",
+        VITE_FRONTEND_FORGE_API_URL: process.env.VITE_FRONTEND_FORGE_API_URL || "",
+        VITE_FRONTEND_FORGE_API_KEY: process.env.VITE_FRONTEND_FORGE_API_KEY || "",
+        VITE_APP_TITLE: process.env.VITE_APP_TITLE || "",
+        VITE_APP_LOGO: process.env.VITE_APP_LOGO || "",
+        VITE_ANALYTICS_ENDPOINT: process.env.VITE_ANALYTICS_ENDPOINT || "",
+        VITE_ANALYTICS_WEBSITE_ID: process.env.VITE_ANALYTICS_WEBSITE_ID || "",
+      };
 
-  // Serve static files
-  app.use(express.static(distPath));
+      const envScript = `<script>
+        window.__ENV__ = ${JSON.stringify(envVars)};
+      </script>`;
 
-  // Fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"), (err) => {
-      if (err) {
-        res.status(404).send("Not found");
-      }
-    });
+      html = html.replace('</head>', `${envScript}</head>`);
+      res.set('Content-Type', 'text/html').send(html);
+    } catch (e) {
+      console.error('Error serving index.html:', e);
+      res.status(500).send('Internal Server Error');
+    }
+  });
+
+  // Fall through to index.html for SPA routing
+  app.use('*', (req, res) => {
+    const indexPath = path.resolve(distPath, 'index.html');
+    try {
+      let html = fs.readFileSync(indexPath, 'utf-8');
+      
+      // Inject environment variables as a global script
+      const envVars = {
+        VITE_APP_ID: process.env.VITE_APP_ID || "",
+        VITE_OAUTH_PORTAL_URL: process.env.VITE_OAUTH_PORTAL_URL || "",
+        VITE_FRONTEND_FORGE_API_URL: process.env.VITE_FRONTEND_FORGE_API_URL || "",
+        VITE_FRONTEND_FORGE_API_KEY: process.env.VITE_FRONTEND_FORGE_API_KEY || "",
+        VITE_APP_TITLE: process.env.VITE_APP_TITLE || "",
+        VITE_APP_LOGO: process.env.VITE_APP_LOGO || "",
+        VITE_ANALYTICS_ENDPOINT: process.env.VITE_ANALYTICS_ENDPOINT || "",
+        VITE_ANALYTICS_WEBSITE_ID: process.env.VITE_ANALYTICS_WEBSITE_ID || "",
+      };
+
+      const envScript = `<script>
+        window.__ENV__ = ${JSON.stringify(envVars)};
+      </script>`;
+
+      html = html.replace('</head>', `${envScript}</head>`);
+      res.set('Content-Type', 'text/html').send(html);
+    } catch (e) {
+      console.error('Error serving index.html:', e);
+      res.status(500).send('Internal Server Error');
+    }
   });
 }
