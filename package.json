@@ -5,8 +5,9 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
+    "prestart": "chmod +x start.sh",
     "build": "node build.mjs",
-    "start": "NODE_ENV=production node dist/index.js",
+    "start": "NODE_ENV=production bash start.sh",
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
