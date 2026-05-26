@@ -1,9 +1,19 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
+// Get environment variables from runtime injection or import.meta.env
+function getEnvVar(key: string): string {
+  // First try window.__ENV__ (injected at runtime by server)
+  if (typeof window !== "undefined" && (window as any).__ENV__?.[key]) {
+    return (window as any).__ENV__[key];
+  }
+  // Fallback to import.meta.env (for development)
+  return import.meta.env[key] || "";
+}
+
 // Generate login URL at runtime so redirect URI reflects the current origin.
 export const getLoginUrl = () => {
-  const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
-  const appId = import.meta.env.VITE_APP_ID;
+  const oauthPortalUrl = getEnvVar("VITE_OAUTH_PORTAL_URL");
+  const appId = getEnvVar("VITE_APP_ID");
   const redirectUri = `${window.location.origin}/api/oauth/callback`;
   const state = btoa(redirectUri);
 
