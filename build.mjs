@@ -26,6 +26,7 @@ const VITE_ENV_VARS = [
 // Create .env.production file with VITE_* variables
 const envContent = VITE_ENV_VARS.map((key) => {
   const value = process.env[key] || "";
+  console.log(`  ${key}=${value ? "***" : "(empty)"}`);
   return `${key}=${value}`;
 }).join("\n");
 
@@ -33,13 +34,17 @@ const envPath = path.join(__dirname, ".env.production");
 fs.writeFileSync(envPath, envContent, "utf-8");
 
 console.log("✅ Created .env.production with VITE_* variables");
+console.log("\n📝 Environment variables:");
 
-// Run the actual build
-console.log("🔨 Building with Vite and esbuild...");
+// Run the actual build with env vars
+console.log("\n🔨 Building with Vite and esbuild...");
 try {
+  // Pass all env vars to the build process
+  const buildEnv = { ...process.env };
   execSync("vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist", {
     cwd: __dirname,
     stdio: "inherit",
+    env: buildEnv,
   });
   console.log("✅ Build completed successfully");
 } catch (error) {
