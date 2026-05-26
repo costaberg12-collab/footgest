@@ -60,16 +60,13 @@ export function serveStatic(app: Express) {
     console.error(`import.meta.dirname: ${import.meta.dirname}`);
   }
 
-  // Middleware to inject environment variables into index.html at runtime
-  // This must come BEFORE express.static to intercept HTML requests
-  app.use("*", (req, res, next) => {
-    // Only intercept HTML requests (index.html and root)
-    if (req.path === "/" || req.path.endsWith(".html")) {
-      const indexPath = path.resolve(distPath, "index.html");
-      try {
-        let html = fs.readFileSync(indexPath, "utf-8");
-
-        // Inject environment variables as a global script
+  // Inject environment variables into index.html at runtime
+  // This is done via a custom middleware that only handles index.html
+  const injectEnvVars = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    // Only intercept requests for index.html
+    const originalSend = res.send;
+    res.send = function(data: any) {
+      if (typeof data === 'string' && data.includes('</head>')) {
         const envVars = {
           VITE_APP_ID: process.env.VITE_APP_ID || "",
           VITE_OAUTH_PORTAL_URL: process.env.VITE_OAUTH_PORTAL_URL || "",
@@ -83,30 +80,26 @@ export function serveStatic(app: Express) {
 
         const envScript = `<script>
           window.__ENV__ = ${JSON.stringify(envVars)};
-          Object.keys(window.__ENV__).forEach(key => {
-            if (typeof import !== 'undefined' && import.meta && import.meta.env) {
-              import.meta.env[key] = window.__ENV__[key];
-            }
-          });
         </script>`;
 
-        html = html.replace("</head>", `${envScript}</head>`);
-        res.set({ "Content-Type": "text/html" }).send(html);
-        return;
-      } catch (e) {
-        console.error("Error injecting environment variables:", e);
-        next();
-        return;
+        data = data.replace("</head>", `${envScript}</head>`);
       }
-    }
+      return originalSend.call(this, data);
+    };
     next();
-  });
+  };
 
-  // Serve static files after the injection middleware
+  app.use(injectEnvVars);
+
+  // Serve static files
   app.use(express.static(distPath));
 
   // Fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+    res.sendFile(path.resolve(distPath, "index.html"), (err) => {
+      if (err) {
+        res.status(404).send("Not found");
+      }
+    });
   });
 }
