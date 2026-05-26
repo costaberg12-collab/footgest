@@ -60,35 +60,53 @@ export function serveStatic(app: Express) {
     console.error(`import.meta.dirname: ${import.meta.dirname}`);
   }
 
+  // Middleware to inject environment variables into index.html at runtime
+  // This must come BEFORE express.static to intercept HTML requests
+  app.use("*", (req, res, next) => {
+    // Only intercept HTML requests (index.html and root)
+    if (req.path === "/" || req.path.endsWith(".html")) {
+      const indexPath = path.resolve(distPath, "index.html");
+      try {
+        let html = fs.readFileSync(indexPath, "utf-8");
+
+        // Inject environment variables as a global script
+        const envVars = {
+          VITE_APP_ID: process.env.VITE_APP_ID || "",
+          VITE_OAUTH_PORTAL_URL: process.env.VITE_OAUTH_PORTAL_URL || "",
+          VITE_FRONTEND_FORGE_API_URL: process.env.VITE_FRONTEND_FORGE_API_URL || "",
+          VITE_FRONTEND_FORGE_API_KEY: process.env.VITE_FRONTEND_FORGE_API_KEY || "",
+          VITE_APP_TITLE: process.env.VITE_APP_TITLE || "",
+          VITE_APP_LOGO: process.env.VITE_APP_LOGO || "",
+          VITE_ANALYTICS_ENDPOINT: process.env.VITE_ANALYTICS_ENDPOINT || "",
+          VITE_ANALYTICS_WEBSITE_ID: process.env.VITE_ANALYTICS_WEBSITE_ID || "",
+        };
+
+        const envScript = `<script>
+          window.__ENV__ = ${JSON.stringify(envVars)};
+          Object.keys(window.__ENV__).forEach(key => {
+            if (typeof import !== 'undefined' && import.meta && import.meta.env) {
+              import.meta.env[key] = window.__ENV__[key];
+            }
+          });
+        </script>`;
+
+        html = html.replace("</head>", `${envScript}</head>`);
+        res.set({ "Content-Type": "text/html" }).send(html);
+        return;
+      } catch (e) {
+        console.error("Error injecting environment variables:", e);
+        next();
+        return;
+      }
+    }
+    next();
+  });
+
+  // Serve static files after the injection middleware
   app.use(express.static(distPath));
 
-  // Middleware to inject environment variables into index.html at runtime
+  // Fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
-    const indexPath = path.resolve(distPath, "index.html");
-    let html = fs.readFileSync(indexPath, "utf-8");
-
-    // Inject environment variables as a global script
-    const envVars = {
-      VITE_APP_ID: process.env.VITE_APP_ID || "",
-      VITE_OAUTH_PORTAL_URL: process.env.VITE_OAUTH_PORTAL_URL || "",
-      VITE_FRONTEND_FORGE_API_URL: process.env.VITE_FRONTEND_FORGE_API_URL || "",
-      VITE_FRONTEND_FORGE_API_KEY: process.env.VITE_FRONTEND_FORGE_API_KEY || "",
-      VITE_APP_TITLE: process.env.VITE_APP_TITLE || "",
-      VITE_APP_LOGO: process.env.VITE_APP_LOGO || "",
-      VITE_ANALYTICS_ENDPOINT: process.env.VITE_ANALYTICS_ENDPOINT || "",
-      VITE_ANALYTICS_WEBSITE_ID: process.env.VITE_ANALYTICS_WEBSITE_ID || "",
-    };
-
-    const envScript = `<script>
-      window.__ENV__ = ${JSON.stringify(envVars)};
-      Object.keys(window.__ENV__).forEach(key => {
-        if (typeof import !== 'undefined' && import.meta && import.meta.env) {
-          import.meta.env[key] = window.__ENV__[key];
-        }
-      });
-    </script>`;
-
-    html = html.replace("</head>", `${envScript}</head>`);
-    res.set({ "Content-Type": "text/html" }).send(html);
+    res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
