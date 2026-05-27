@@ -331,7 +331,7 @@ export default function Home() {
       <section className="overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_left,var(--brand-primary)_0,var(--brand-primary)_35%,var(--brand-secondary)_70%,#081b13_100%)] p-5 text-white shadow-2xl md:p-8">
         <div className="grid gap-6 lg:grid-cols-[1.25fr_.75fr] lg:items-end">
           <div className="space-y-4">
-            <Badge className="border-white/20 bg-white/15 text-white hover:bg-white/20">{data.settings.appName}</Badge>
+            <Badge className="border-white/20 bg-white/15 text-white hover:bg-white/20">Footgest app</Badge>
             <div>
               <div className="flex flex-wrap items-center gap-3">{data.settings.logoUrl && <img src={data.settings.logoUrl} alt="Logo do grupo" className="h-16 w-16 rounded-2xl border border-white/30 object-contain" style={{ backgroundColor: 'transparent' }} />}<h1 className="text-3xl font-black tracking-tight md:text-5xl">{getWelcomeMessage()}</h1></div>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-50 md:text-base">

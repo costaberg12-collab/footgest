@@ -680,11 +680,6 @@ export const appRouter = router({
       return { accepted: !!acceptance[0] } as const;
     }),
 
-    getAppSettings: protectedProcedure.query(async () => {
-      const settings = await ensureAppSettings();
-      return settings;
-    }),
-
     invitePlayer: adminProcedure
       .input(
         z.object({
