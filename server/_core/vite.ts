@@ -25,10 +25,10 @@ export async function setupVite(app: Express, server: Server) {
     const url = req.originalUrl;
 
     try {
-      const baseDir = import.meta.dirname || process.cwd();
+      // Use process.cwd() for better compatibility with production environments
+      const baseDir = process.cwd();
       const clientTemplate = path.resolve(
         baseDir,
-        "../..",
         "client",
         "index.html"
       );
@@ -49,17 +49,16 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  // Em produção, o diretório é /app/dist (após esbuild bundle)
-  // Em desenvolvimento, é import.meta.dirname
-  const baseDir = import.meta.dirname || process.cwd();
-  const distPath = path.resolve(baseDir, "public");
+  // Use process.cwd() for better compatibility with production environments
+  const baseDir = process.cwd();
+  const distPath = path.resolve(baseDir, "dist/public");
   
   if (!fs.existsSync(distPath)) {
     console.error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`
     );
     console.error(`Current directory: ${process.cwd()}`);
-    console.error(`import.meta.dirname: ${import.meta.dirname}`);
+    console.error(`dist path resolved to: ${distPath}`);
   }
 
   // Inject environment variables into index.html at runtime

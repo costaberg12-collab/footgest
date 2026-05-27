@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import * as schema from "../drizzle/schema";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, appSettings, players } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
@@ -87,5 +87,27 @@ export async function getUserByOpenId(openId: string) {
 
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
 
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getAppSettings() {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get appSettings: database not available");
+    return undefined;
+  }
+
+  const result = await db.select().from(appSettings).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getPlayerByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get player: database not available");
+    return undefined;
+  }
+
+  const result = await db.select().from(players).where(eq(players.userId, userId)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }

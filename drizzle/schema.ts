@@ -31,6 +31,7 @@ export const appSettings = mysqlTable("appSettings", {
   ownerId: int("ownerId").references(() => users.id),
   appName: varchar("appName", { length: 80 }).default("Footgest").notNull(),
   teamName: varchar("teamName", { length: 80 }).default("Footbreja").notNull(),
+  welcomeMessage: varchar("welcomeMessage", { length: 255 }).default("Bem-vindo ao painel de gestão do seu time").notNull(),
   monthlyFeeCents: int("monthlyFeeCents").default(0).notNull(),
   appDescription: text("appDescription"),
   primaryColor: varchar("primaryColor", { length: 16 }).default("#16a34a").notNull(),
@@ -184,6 +185,7 @@ export const gameEvents = mysqlTable("gameEvents", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type AppSettings = typeof appSettings.$inferSelect;
+export type InsertAppSettings = typeof appSettings.$inferInsert;
 export type Player = typeof players.$inferSelect;
 export type Match = typeof matches.$inferSelect;
 export type Attendance = typeof attendances.$inferSelect;

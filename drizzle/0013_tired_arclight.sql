@@ -1,0 +1,1 @@
+ALTER TABLE `appSettings` ADD `welcomeMessage` text DEFAULT ('Bem-vindo ao painel de gestão do seu time') NOT NULL;
