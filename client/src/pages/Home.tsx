@@ -74,8 +74,30 @@ export default function Home() {
   const overview = trpc.futgestao.overview.useQuery(undefined, { refetchInterval: 20000 });
   const stats = trpc.futgestao.stats.useQuery();
   const appSettings = trpc.futgestao.getAppSettings.useQuery();
+  const playerInfo = trpc.futgestao.getPlayerInfo.useQuery(undefined, { enabled: !!user });
   const isOwner = appSettings.data && user && appSettings.data.ownerId === user.id;
   const canAccessControlPanel = isOwner || (user && user.role === 'admin');
+  
+  // Determine welcome message based on user role
+  const getWelcomeMessage = () => {
+    if (!playerInfo.data) return appSettings.data?.teamName || 'Footgest';
+    
+    if (playerInfo.data.role === 'admin') {
+      return `${playerInfo.data.teamName} - Bem-vindo ao painel de gestão do seu time`;
+    } else {
+      // For players
+      return `${playerInfo.data.teamName} - ${playerInfo.data.welcomeMessage || 'Bem-vindo'}`;
+    }
+  };
+  
+  // Determine tab label for players
+  const getPresenceTabLabel = () => {
+    if (playerInfo.data?.role === 'admin') {
+      return 'Controle';
+    } else {
+      return 'Controle de Confirmação';
+    }
+  };
 
   const createPlayer = trpc.futgestao.createPlayer.useMutation({ onSuccess: () => refresh("Jogador cadastrado.") });
   const createMyPlayer = trpc.futgestao.createMyPlayer.useMutation({ onSuccess: () => refresh("Seu cadastro foi salvo.") });
@@ -311,7 +333,7 @@ export default function Home() {
           <div className="space-y-4">
             <Badge className="border-white/20 bg-white/15 text-white hover:bg-white/20">{data.settings.appName}</Badge>
             <div>
-              <div className="flex flex-wrap items-center gap-3">{data.settings.logoUrl && <img src={data.settings.logoUrl} alt="Logo do grupo" className="h-16 w-16 rounded-2xl border border-white/30 object-contain" style={{ backgroundColor: 'transparent' }} />}<h1 className="text-3xl font-black tracking-tight md:text-5xl">{data.settings.appName}</h1></div>
+              <div className="flex flex-wrap items-center gap-3">{data.settings.logoUrl && <img src={data.settings.logoUrl} alt="Logo do grupo" className="h-16 w-16 rounded-2xl border border-white/30 object-contain" style={{ backgroundColor: 'transparent' }} />}<h1 className="text-3xl font-black tracking-tight md:text-5xl">{getWelcomeMessage()}</h1></div>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-50 md:text-base">
                 {appDescription}
               </p>
@@ -350,7 +372,7 @@ export default function Home() {
 
       <Tabs defaultValue="presenca" className="space-y-4">
         <TabsList className="grid h-auto grid-cols-2 gap-2 rounded-2xl bg-muted p-2 md:grid-cols-8">
-          <TabsTrigger value="presenca">Presença</TabsTrigger>
+          <TabsTrigger value="presenca">{getPresenceTabLabel()}</TabsTrigger>
           <TabsTrigger value="jogadores">Jogadores</TabsTrigger>
           <TabsTrigger value="convidados">Convidados</TabsTrigger>
           <TabsTrigger value="financeiro">Financeiro</TabsTrigger>

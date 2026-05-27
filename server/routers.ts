@@ -171,6 +171,29 @@ export const appRouter = router({
   }),
 
   futgestao: router({
+    getAppSettings: publicProcedure.query(async () => {
+      const settings = await ensureAppSettings();
+      return {
+        teamName: settings.teamName,
+        welcomeMessage: settings.welcomeMessage,
+        appName: settings.appName,
+      };
+    }),
+
+    getPlayerInfo: protectedProcedure.query(async ({ ctx }) => {
+      const db = await requireDb();
+      const settings = await ensureAppSettings();
+      const player = await db.select().from(players).where(eq(players.userId, ctx.user.id)).limit(1);
+      
+      return {
+        role: ctx.user.role,
+        teamName: settings.teamName,
+        welcomeMessage: settings.welcomeMessage,
+        appName: settings.appName,
+        isPlayer: !!player[0],
+      };
+    }),
+
     overview: protectedProcedure.query(async () => {
       const db = await requireDb();
       const match = await ensureCurrentMatch();
